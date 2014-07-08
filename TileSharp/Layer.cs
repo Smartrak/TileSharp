@@ -5,7 +5,7 @@
 		public readonly IDataSource DataSource;
 		public readonly LayerType Type;
 
-		public Layer(IDataSource dataSource, LayerType type)
+		protected Layer(IDataSource dataSource, LayerType type)
 		{
 			DataSource = dataSource;
 			Type = type;

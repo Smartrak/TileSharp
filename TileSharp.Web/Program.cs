@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
+using TileSharp.Layers;
+using TileSharp.Styles;
 
 namespace TileSharp.Web
 {
@@ -26,8 +28,8 @@ namespace TileSharp.Web
 
 			_layerConfig = new LayerConfig(Color.Cyan, new List<Layer>
 			{
-				new Layer(new RandomPolygonDataSource(), LayerType.Polygon),
-				new Layer(new RandomLineDataSource(), LayerType.Line)
+				new PolygonLayer(new RandomPolygonDataSource(), new FillStyle(Color.Cornsilk), new StrokeStyle(Color.Red, 5)),
+				new LineLayer(new RandomLineDataSource(), new StrokeStyle(Color.Blue, 3, new []{ 4.0f, 4.0f }))
 			});
 
 			while (true)

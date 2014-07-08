@@ -50,8 +50,12 @@
     <Compile Include="Layer.cs" />
     <Compile Include="LayerConfig.cs" />
     <Compile Include="LayerType.cs" />
+    <Compile Include="Layers\LineLayer.cs" />
+    <Compile Include="Layers\PolygonLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Renderer.cs" />
+    <Compile Include="Styles\StrokeStyle.cs" />
+    <Compile Include="Styles\FillStyle.cs" />
     <Compile Include="TileConfig.cs" />
   </ItemGroup>
   <ItemGroup>

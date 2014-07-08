@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using TileSharp.Layers;
 
 namespace TileSharp
 {
@@ -36,10 +37,10 @@ namespace TileSharp
 					switch (layer.Type)
 					{
 						case LayerType.Line:
-							RenderLine(layer, data);
+							RenderLine((LineLayer)layer, data);
 							break;
 						case LayerType.Polygon:
-							RenderPolygon(layer, data);
+							RenderPolygon((PolygonLayer)layer, data);
 							break;
 						default:
 							throw new NotImplementedException("Don't know how to render layer type " + layer.Type);
@@ -68,22 +69,46 @@ namespace TileSharp
 			return res;
 		}
 
-		private void RenderLine(Layer layer, List<IGeometry> data)
+		private void RenderLine(LineLayer layer, List<IGeometry> data)
 		{
+			//TODO: cache this
+			var pen = new Pen(layer.StrokeStyle.Color, layer.StrokeStyle.Thickness);
+			pen.DashPattern = layer.StrokeStyle.DashPattern;
+
 			foreach (var line in data.Cast<ILineString>())
 			{
 				var points = Project(line.Coordinates);
-				_graphics.DrawLines(Pens.Black, points);
+				_graphics.DrawLines(pen, points);
 			}
 		}
 
-		private void RenderPolygon(Layer layer, List<IGeometry> data)
+		private void RenderPolygon(PolygonLayer layer, List<IGeometry> data)
 		{
+			//TODO: cache this
+			Brush brush = null;
+			if (layer.FillStyle != null)
+			{
+				brush = new SolidBrush(layer.FillStyle.Color);
+			}
+
+			//TODO: cache this
+			Pen pen = null;
+			if (layer.StrokeStyle != null)
+			{
+				pen = new Pen(layer.StrokeStyle.Color, layer.StrokeStyle.Thickness);
+				if (layer.StrokeStyle.DashPattern != null)
+					pen.DashPattern = layer.StrokeStyle.DashPattern;
+			}
+
 			foreach (var polygon in data.Cast<IPolygon>())
 			{
 				var points = Project(polygon.Coordinates);
-				_graphics.FillPolygon(Brushes.BurlyWood, points);
-				_graphics.DrawLines(Pens.DarkGoldenrod, points);
+
+				if (brush != null)
+					_graphics.FillPolygon(brush, points);
+
+				if (pen != null)
+					_graphics.DrawLines(pen, points);
 			}
 			//throw new NotImplementedException();
 		}
