@@ -1,9 +1,10 @@
-﻿using GeoAPI.Geometries;
+﻿using System.Collections.Generic;
+using GeoAPI.Geometries;
 
 namespace TileSharp
 {
 	public interface IDataSource
 	{
-		IGeometryCollection Fetch(Envelope envelope);
+		List<IGeometry> Fetch(Envelope envelope);
 	}
 }
