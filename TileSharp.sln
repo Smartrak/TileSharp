@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{17088A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TileSharp.Data.GeoJson", "TileSharp.Data.GeoJson\TileSharp.Data.GeoJson.csproj", "{233CCF86-3E53-4C4F-A0DF-97FB03713BBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{EE567193-E5BE-4C85-A2ED-A921F2FD48F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE567193-E5BE-4C85-A2ED-A921F2FD48F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE567193-E5BE-4C85-A2ED-A921F2FD48F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{233CCF86-3E53-4C4F-A0DF-97FB03713BBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{233CCF86-3E53-4C4F-A0DF-97FB03713BBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{233CCF86-3E53-4C4F-A0DF-97FB03713BBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{233CCF86-3E53-4C4F-A0DF-97FB03713BBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
