@@ -52,11 +52,27 @@ namespace TileSharp
 			return new Envelope(min.X, max.X, min.Y, max.Y);
 		}
 
+		private static double TileToLon(int z, int x)
+		{
+			return (x / Math.Pow(2, z) * 360 - 180);
+		}
+
+		private static double TileToLat(int z, int y)
+		{
+			var n = Math.PI - 2 * Math.PI * y / Math.Pow(2, z);
+			return (180 / Math.PI * Math.Atan(0.5 * (Math.Exp(n) - Math.Exp(-n))));
+		}
+
 		/// <summary>
 		/// Returns bounds of the given tile in latutude/longitude using WGS84 datum
 		/// </summary>
 		public static Envelope TileLatLonBounds(int z, int x, int y)
 		{
+			return new Envelope(
+				new Coordinate(TileToLon(z, x), TileToLat(z, y)),
+				new Coordinate(TileToLon(z, x + 1), TileToLat(z, y + 1))
+				);
+
 			var bounds = TileBounds(z, x, y);
 			var min = MetersToLatLon(bounds.MinX, bounds.MinY);
 			var max = MetersToLatLon(bounds.MaxX, bounds.MaxY);
@@ -64,3 +80,29 @@ namespace TileSharp
 		}
 	}
 }
+
+/*
+ * This code is taken from http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/
+ * Here is their licence:
+###############################################################################
+# Copyright (c) 2008 Klokan Petr Pridal. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+###############################################################################
+*/

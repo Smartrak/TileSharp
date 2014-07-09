@@ -54,6 +54,9 @@ namespace TileSharp
 
 		private PointF[] Project(Coordinate[] coords)
 		{
+			//TODO: Could consider simplifying https://github.com/mourner/simplify-js
+			//TODO: Clip polygons to map edge?
+
 			var spanX = _config.Envelope.MaxX - _config.Envelope.MinX;
 			var spanY = _config.Envelope.MaxY - _config.Envelope.MinY;
 
@@ -63,7 +66,7 @@ namespace TileSharp
 				var c = coords[i];
 				res[i] = new PointF(
 					(float)((c.X - _config.Envelope.MinX) * EnvelopeCalculator.TileSize / spanX),
-					(float)((c.Y - _config.Envelope.MinY) * EnvelopeCalculator.TileSize / spanY)
+					(float)((c.Y - _config.Envelope.MaxY) * EnvelopeCalculator.TileSize / -spanY)
 					);
 			}
 			return res;
