@@ -3,13 +3,14 @@ using GeoAPI.Geometries;
 
 namespace TileSharp
 {
-	public static class EnvelopeCalculator
+	public static class SphericalMercator
 	{
 		public const int TileSize = 256;
 		public const double OriginShift = 2 * Math.PI * 6378137 / 2.0;
 		public const double InitialResolution = 2 * Math.PI * 6378137 / TileSize;
 
 		// http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/
+		// http://stackoverflow.com/questions/12896139/geographic-coordinates-converter
 
 		/// <summary>
 		/// Resolution (meters/pixel) for given zoom level (measured at Equator)
@@ -43,40 +44,22 @@ namespace TileSharp
 		}
 
 		/// <summary>
-		/// Returns bounds of the given tile in EPSG:900913 coordinates
+		/// Converts TMS tile coordinates to the epsg:900913 bounding envelope of the given tile
 		/// </summary>
-		public static Envelope TileBounds(int z, int x, int y)
+		private static Envelope TileBounds(int z, int x, int y)
 		{
 			var min = PixelsToMeters(z, x * TileSize, y * TileSize);
 			var max = PixelsToMeters(z, (x + 1) * TileSize, (y + 1) * TileSize);
 			return new Envelope(min.X, max.X, min.Y, max.Y);
 		}
 
-		private static double TileToLon(int z, int x)
-		{
-			return (x / Math.Pow(2, z) * 360 - 180);
-		}
-
-		private static double TileToLat(int z, int y)
-		{
-			var n = Math.PI - 2 * Math.PI * y / Math.Pow(2, z);
-			return (180 / Math.PI * Math.Atan(0.5 * (Math.Exp(n) - Math.Exp(-n))));
-		}
-
 		/// <summary>
-		/// Returns bounds of the given tile in latutude/longitude using WGS84 datum
+		/// Converts Google tile coordinates to the epsg:900913 bounding envelope of the given tile
 		/// </summary>
-		public static Envelope TileLatLonBounds(int z, int x, int y)
+		public static Envelope GoogleTileBounds(int z, int x, int y)
 		{
-			return new Envelope(
-				new Coordinate(TileToLon(z, x), TileToLat(z, y)),
-				new Coordinate(TileToLon(z, x + 1), TileToLat(z, y + 1))
-				);
-
-			var bounds = TileBounds(z, x, y);
-			var min = MetersToLatLon(bounds.MinX, bounds.MinY);
-			var max = MetersToLatLon(bounds.MaxX, bounds.MaxY);
-			return new Envelope(min, max);
+			//coordinate origin is moved from bottom-left to top-left corner of the extent
+			return TileBounds(z, x, (int)Math.Pow(2, z) - 1 - y);
 		}
 	}
 }

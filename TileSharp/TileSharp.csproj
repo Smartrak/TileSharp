@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EnvelopeCalculator.cs" />
+    <Compile Include="SphericalMercator.cs" />
     <Compile Include="IDataSource.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="LayerConfig.cs" />

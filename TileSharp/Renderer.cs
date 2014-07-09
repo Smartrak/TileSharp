@@ -65,8 +65,8 @@ namespace TileSharp
 			{
 				var c = coords[i];
 				res[i] = new PointF(
-					(float)((c.X - _config.Envelope.MinX) * EnvelopeCalculator.TileSize / spanX),
-					(float)((c.Y - _config.Envelope.MaxY) * EnvelopeCalculator.TileSize / -spanY)
+					(float)((c.X - _config.Envelope.MinX) * SphericalMercator.TileSize / spanX),
+					(float)((c.Y - _config.Envelope.MaxY) * SphericalMercator.TileSize / -spanY)
 					);
 			}
 			return res;

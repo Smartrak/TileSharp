@@ -55,7 +55,7 @@ namespace TileSharp.Web
 			var z = int.Parse(split[0]);
 			var x = int.Parse(split[1]);
 			var y = int.Parse(split[2]);
-			var bounds = EnvelopeCalculator.TileLatLonBounds(z, x, y);
+			var bounds = SphericalMercator.GoogleTileBounds(z, x, y);
 
 			var renderer = new Renderer();
 			var tile = renderer.GenerateTile(new TileConfig(256, bounds, _layerConfig));
