@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using NetTopologySuite.Features;
 using TileSharp.Layers;
 
 namespace TileSharp
@@ -21,7 +22,7 @@ namespace TileSharp
 		public Bitmap GenerateTile(TileConfig config)
 		{
 			_config = config;
-			var geometry = new Dictionary<IDataSource, List<IGeometry>>();
+			var features = new Dictionary<IDataSource, List<Feature>>();
 
 			var bitmap = new Bitmap(config.PixelSize, config.PixelSize);
 			using (_graphics = Graphics.FromImage(bitmap))
@@ -33,20 +34,20 @@ namespace TileSharp
 					if (layer.MaxZoom.HasValue && layer.MaxZoom.Value > config.ZoomLevel)
 						continue;
 
-					if (!geometry.ContainsKey(layer.DataSource))
-						geometry.Add(layer.DataSource, layer.DataSource.Fetch(config.Envelope));
-					var data = geometry[layer.DataSource];
+					if (!features.ContainsKey(layer.DataSource))
+						features.Add(layer.DataSource, layer.DataSource.Fetch(config.Envelope));
+					var featureList = features[layer.DataSource];
 
 					switch (layer.Type)
 					{
 						case LayerType.Line:
-							RenderLine((LineLayer)layer, data);
+							RenderLine((LineLayer)layer, featureList);
 							break;
 						case LayerType.Polygon:
-							RenderPolygon((PolygonLayer)layer, data);
+							RenderPolygon((PolygonLayer)layer, featureList);
 							break;
 						case LayerType.Point:
-							RenderPoint((PointLayer)layer, data);
+							RenderPoint((PointLayer)layer, featureList);
 							break;
 						default:
 							throw new NotImplementedException("Don't know how to render layer type " + layer.Type);
@@ -78,21 +79,21 @@ namespace TileSharp
 			return res;
 		}
 
-		private void RenderLine(LineLayer layer, List<IGeometry> data)
+		private void RenderLine(LineLayer layer, List<Feature> data)
 		{
 			//TODO: cache this
 			var pen = new Pen(layer.StrokeStyle.Color, layer.StrokeStyle.Thickness);
 			if (layer.StrokeStyle.DashPattern != null)
 				pen.DashPattern = layer.StrokeStyle.DashPattern;
 
-			foreach (var line in data.Cast<ILineString>())
+			foreach (var line in data.Select(x => (ILineString)x.Geometry))
 			{
 				var points = Project(line.Coordinates);
 				_graphics.DrawLines(pen, points);
 			}
 		}
 
-		private void RenderPoint(PointLayer layer, List<IGeometry> data)
+		private void RenderPoint(PointLayer layer, List<Feature> data)
 		{
 			//TODO: cache this
 			var brush = new SolidBrush(layer.PointStyle.Color);
@@ -100,7 +101,7 @@ namespace TileSharp
 			var coords = new Coordinate[data.Count];
 			for (var i = 0; i < data.Count; i++)
 			{
-				coords[i] = data[i].Coordinate;
+				coords[i] = data[i].Geometry.Coordinate;
 			}
 			var points = Project(coords);
 
@@ -109,7 +110,7 @@ namespace TileSharp
 				_graphics.FillEllipse(brush, p.X - diff, p.Y - diff, layer.PointStyle.Diameter, layer.PointStyle.Diameter);
 		}
 
-		private void RenderPolygon(PolygonLayer layer, List<IGeometry> data)
+		private void RenderPolygon(PolygonLayer layer, List<Feature> data)
 		{
 			//TODO: cache this
 			Brush brush = null;
@@ -127,7 +128,7 @@ namespace TileSharp
 					pen.DashPattern = layer.StrokeStyle.DashPattern;
 			}
 
-			foreach (var polygon in data.Cast<IPolygon>())
+			foreach (var polygon in data.Select(x => (IPolygon)x.Geometry))
 			{
 				//TODO: Do we need two version of the code here, or can we just always use a graphics path?
 				if (polygon.Holes.Length > 0)

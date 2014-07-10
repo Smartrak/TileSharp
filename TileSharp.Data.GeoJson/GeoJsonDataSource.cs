@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using GeoAPI.Geometries;
 using GeoJsonSharp;
+using NetTopologySuite.Features;
 
 namespace TileSharp.Data.GeoJson
 {
@@ -15,9 +16,9 @@ namespace TileSharp.Data.GeoJson
 			_featureCollection = new GeoJsonParser(File.ReadAllText(fileName), new ParserSettings { SkipInvalidGeometry = true }).Parse();
 		}
 
-		public List<IGeometry> Fetch(Envelope envelope)
+		public List<Feature> Fetch(Envelope envelope)
 		{
-			var res = new List<IGeometry>();
+			var res = new List<Feature>();
 
 			foreach (var feature in _featureCollection.Features)
 			{
@@ -27,11 +28,11 @@ namespace TileSharp.Data.GeoJson
 					if (feature.Geometry is IMultiLineString || feature.Geometry is IMultiPolygon)
 					{
 						for (var i = 0; i < feature.Geometry.NumGeometries; i++)
-							res.Add(feature.Geometry.GetGeometryN(i));
+							res.Add(new Feature(feature.Geometry.GetGeometryN(i), feature.Attributes));
 					}
 					else
 					{
-						res.Add(feature.Geometry);
+						res.Add(feature);
 					}
 				}
 			}
@@ -40,11 +41,15 @@ namespace TileSharp.Data.GeoJson
 		}
 
 		/// <summary>
-		/// Remove everything that matches the given predicate
+		/// Remove everything that doesn't match the given predicate
 		/// </summary>
-		public GeoJsonDataSource ExceptWhere(Predicate<Feature> removeFilter)
+		public GeoJsonDataSource Where(Predicate<Feature> keepFilter)
 		{
-			_featureCollection.Features.RemoveAll(removeFilter);
+			for (var i = _featureCollection.Count - 1; i >= 0; i--)
+			{
+				if (!keepFilter(_featureCollection.Features[i]))
+					_featureCollection.Features.RemoveAt(i);
+			}
 			return this;
 		}
 	}

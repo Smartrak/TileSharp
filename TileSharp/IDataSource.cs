@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using GeoAPI.Geometries;
+using NetTopologySuite.Features;
 
 namespace TileSharp
 {
 	public interface IDataSource
 	{
-		List<IGeometry> Fetch(Envelope envelope);
+		List<Feature> Fetch(Envelope envelope);
 	}
 }

@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using TileSharp.Layers;
 using TileSharp.Styles;
@@ -76,9 +77,9 @@ namespace TileSharp.Web
 
 	internal class RandomLineDataSource : IDataSource
 	{
-		public List<IGeometry> Fetch(Envelope envelope)
+		public List<Feature> Fetch(Envelope envelope)
 		{
-			var res = new List<IGeometry>();
+			var res = new List<Feature>();
 
 			var xDif = envelope.MaxX - envelope.MinX;
 			var yDif = envelope.MaxY - envelope.MinY;
@@ -89,7 +90,7 @@ namespace TileSharp.Web
 				{
 					coords.Add(new Coordinate(envelope.MinX + xDif * Program.Random.NextDouble(), envelope.MinY + yDif * Program.Random.NextDouble()));
 				}
-				res.Add(new LineString(coords.ToArray()));
+				res.Add(new Feature(new LineString(coords.ToArray()), null));
 			}
 
 			return res;
@@ -98,9 +99,9 @@ namespace TileSharp.Web
 
 	internal class RandomPolygonDataSource : IDataSource
 	{
-		public List<IGeometry> Fetch(Envelope envelope)
+		public List<Feature> Fetch(Envelope envelope)
 		{
-			var res = new List<IGeometry>();
+			var res = new List<Feature>();
 
 			var xDif = envelope.MaxX - envelope.MinX;
 			var yDif = envelope.MaxY - envelope.MinY;
@@ -112,7 +113,7 @@ namespace TileSharp.Web
 					coords.Add(new Coordinate(envelope.MinX + xDif * Program.Random.NextDouble(), envelope.MinY + yDif * Program.Random.NextDouble()));
 				}
 				coords.Add(coords[0]);
-				res.Add(new Polygon(new LinearRing(coords.ToArray())));
+				res.Add(new Feature(new Polygon(new LinearRing(coords.ToArray())), null));
 			}
 
 			return res;
