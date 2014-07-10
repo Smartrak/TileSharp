@@ -58,7 +58,7 @@ namespace TileSharp.Web
 			var bounds = SphericalMercator.GoogleTileBounds(z, x, y);
 
 			var renderer = new Renderer();
-			var tile = renderer.GenerateTile(new TileConfig(256, bounds, _layerConfig));
+			var tile = renderer.GenerateTile(new TileConfig(256, z, bounds, _layerConfig));
 
 			ctx.Response.ContentType = "image/png";
 			tile.Save(ctx.Response.OutputStream, ImageFormat.Png);
