@@ -30,6 +30,9 @@ namespace TileSharp
 
 				foreach (var layer in config.LayerConfig.Layers)
 				{
+					if (layer.MaxZoom.HasValue && layer.MaxZoom.Value > config.ZoomLevel)
+						continue;
+
 					if (!geometry.ContainsKey(layer.DataSource))
 						geometry.Add(layer.DataSource, layer.DataSource.Fetch(config.Envelope));
 					var data = geometry[layer.DataSource];

@@ -14,14 +14,17 @@ namespace TileSharp
 		/// </summary>
 		public readonly Envelope Envelope;
 
+		public readonly int ZoomLevel;
+
 		/// <summary>
 		/// Layers and rendering settings for the tile
 		/// </summary>
 		public readonly LayerConfig LayerConfig;
 
-		public TileConfig(int pixelSize, Envelope envelope, LayerConfig layerConfig)
+		public TileConfig(int pixelSize, int zoomLevel, Envelope envelope, LayerConfig layerConfig)
 		{
 			PixelSize = pixelSize;
+			ZoomLevel = zoomLevel;
 			Envelope = envelope;
 			LayerConfig = layerConfig;
 		}
