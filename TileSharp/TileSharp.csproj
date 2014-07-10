@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Layers\LineLabelLayer.cs" />
     <Compile Include="Layers\PointLabelLayer.cs" />
     <Compile Include="Layers\PointLayer.cs" />
     <Compile Include="SphericalMercator.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Layers\PolygonLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Renderer.cs" />
+    <Compile Include="Styles\LineLabelStyle.cs" />
     <Compile Include="Styles\PointLabelStyle.cs" />
     <Compile Include="Styles\PointStyle.cs" />
     <Compile Include="Styles\StrokeStyle.cs" />

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using TileSharp.Layers;
@@ -51,6 +49,9 @@ namespace TileSharp
 							break;
 						case LayerType.PointLabel:
 							RenderPointLabel((PointLabelLayer)layer, featureList);
+							break;
+						case LayerType.LineLabel:
+							RenderLineLabel((LineLabelLayer)layer, featureList);
 							break;
 						default:
 							throw new NotImplementedException("Don't know how to render layer type " + layer.Type);
@@ -171,10 +172,8 @@ namespace TileSharp
 			//TODO: Cache
 			var pen = new Pen(Color.White, 3);
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
-			//var font = new Font(FontFamily.GenericSansSerif, emSize, FontStyle.Bold);
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
 
-			//_graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			_graphics.SmoothingMode = SmoothingMode.HighQuality;
 
 			foreach (var point in data)
@@ -192,10 +191,68 @@ namespace TileSharp
 					_graphics.DrawPath(pen, path);
 					_graphics.FillPath(Brushes.Black, path);
 				}
-				//_graphics.DrawString(str, new Font("Arial", 12), Brushes.Black, coord.X, coord.Y);
 			}
 			_graphics.SmoothingMode = SmoothingMode.Default;
-			//_graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+		}
+
+		private void RenderLineLabel(LineLabelLayer layer, List<Feature> data)
+		{
+			var fontSize = 14;
+			var emSize = _graphics.DpiY * fontSize / 72;
+
+			//TODO: Cache
+			var pen = new Pen(Color.White, 3);
+			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
+			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
+			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
+
+			_graphics.SmoothingMode = SmoothingMode.HighQuality;
+
+			foreach (var feature in data)
+			{
+				//TODO labels could be not strings
+				var str = feature.Attributes.Exists(layer.LabelAttribute) ? feature.Attributes[layer.LabelAttribute] as string : null;
+				if (string.IsNullOrWhiteSpace(str))
+					continue;
+
+				var line = (ILineString)feature.Geometry;
+				var lengthIndexed = new NetTopologySuite.LinearReferencing.LengthIndexedLine(line);
+				var midLength = line.Length / 2;
+				var subLine = lengthIndexed.ExtractLine(midLength * 0.99f, midLength * 1.01f);
+				if (subLine.Coordinates.Length < 2)
+					continue;
+
+				var coords = Project(subLine.Coordinates);
+				var lastCoord = coords.Last();
+
+				var midPoint = new PointF((coords[0].X + lastCoord.X) * 0.5f, (coords[0].Y + lastCoord.Y) * 0.5f);
+				var size = _graphics.MeasureString(str, font);
+
+				var angle = (float)(Math.Atan2(lastCoord.Y - coords[0].Y, lastCoord.X - coords[0].X) * 180 / Math.PI);
+				//Keep the text up the right way
+				if (angle > 90)
+					angle -= 180;
+				if (angle < -90)
+					angle += 180;
+
+				//TODO _graphics.RotateTransform
+				var topLeft = new PointF(-size.Width / 2, -ascent / 2);
+
+				using (var path = new GraphicsPath())
+				{
+					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, topLeft, new StringFormat());
+
+					//path.Transform
+					_graphics.TranslateTransform(midPoint.X, midPoint.Y);
+					_graphics.RotateTransform(angle);
+					{
+						_graphics.DrawPath(pen, path);
+						_graphics.FillPath(Brushes.Black, path);
+					}
+					_graphics.ResetTransform();
+				}
+			}
+			_graphics.SmoothingMode = SmoothingMode.Default;
 		}
 	}
 }

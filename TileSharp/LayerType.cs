@@ -7,7 +7,7 @@
 		Polygon,
 		Point,
 
-		PointLabel
-		//TODO: Labels, Points
+		PointLabel,
+		LineLabel
 	}
 }
