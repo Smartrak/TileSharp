@@ -4,7 +4,8 @@
 	{
 		Unset,
 		Line,
-		Polygon
+		Polygon,
+		Point
 		//TODO: Labels, Points
 	}
 }

@@ -42,6 +42,9 @@ namespace TileSharp
 						case LayerType.Polygon:
 							RenderPolygon((PolygonLayer)layer, data);
 							break;
+						case LayerType.Point:
+							RenderPoint((PointLayer)layer, data);
+							break;
 						default:
 							throw new NotImplementedException("Don't know how to render layer type " + layer.Type);
 					}
@@ -84,6 +87,23 @@ namespace TileSharp
 				var points = Project(line.Coordinates);
 				_graphics.DrawLines(pen, points);
 			}
+		}
+
+		private void RenderPoint(PointLayer layer, List<IGeometry> data)
+		{
+			//TODO: cache this
+			var brush = new SolidBrush(layer.PointStyle.Color);
+
+			var coords = new Coordinate[data.Count];
+			for (var i = 0; i < data.Count; i++)
+			{
+				coords[i] = data[i].Coordinate;
+			}
+			var points = Project(coords);
+
+			var diff = layer.PointStyle.Diameter * 0.5f;
+			foreach (var p in points)
+				_graphics.FillEllipse(brush, p.X - diff, p.Y - diff, layer.PointStyle.Diameter, layer.PointStyle.Diameter);
 		}
 
 		private void RenderPolygon(PolygonLayer layer, List<IGeometry> data)

@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Layers\PointLayer.cs" />
     <Compile Include="SphericalMercator.cs" />
     <Compile Include="IDataSource.cs" />
     <Compile Include="Layer.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="Layers\PolygonLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Renderer.cs" />
+    <Compile Include="Styles\PointStyle.cs" />
     <Compile Include="Styles\StrokeStyle.cs" />
     <Compile Include="Styles\FillStyle.cs" />
     <Compile Include="TileConfig.cs" />
