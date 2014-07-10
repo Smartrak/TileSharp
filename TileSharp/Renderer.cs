@@ -76,7 +76,8 @@ namespace TileSharp
 		{
 			//TODO: cache this
 			var pen = new Pen(layer.StrokeStyle.Color, layer.StrokeStyle.Thickness);
-			pen.DashPattern = layer.StrokeStyle.DashPattern;
+			if (layer.StrokeStyle.DashPattern != null)
+				pen.DashPattern = layer.StrokeStyle.DashPattern;
 
 			foreach (var line in data.Cast<ILineString>())
 			{
