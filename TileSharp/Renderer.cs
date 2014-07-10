@@ -106,15 +106,35 @@ namespace TileSharp
 
 			foreach (var polygon in data.Cast<IPolygon>())
 			{
-				var points = Project(polygon.Coordinates);
+				//TODO: Do we need two version of the code here, or can we just always use a graphics path?
+				if (polygon.Holes.Length > 0)
+				{
+					using (var gp = new GraphicsPath())
+					{
+						gp.AddPolygon(Project(polygon.ExteriorRing.Coordinates));
 
-				if (brush != null)
-					_graphics.FillPolygon(brush, points);
+						for (var i = 0; i < polygon.Holes.Length; i++)
+							gp.AddPolygon(Project(polygon.Holes[i].Coordinates));
 
-				if (pen != null)
-					_graphics.DrawLines(pen, points);
+
+						if (brush != null)
+							_graphics.FillPath(brush, gp);
+
+						if (pen != null)
+							_graphics.DrawPath(pen, gp);
+					}
+				}
+				else
+				{
+					var points = Project(polygon.Coordinates);
+
+					if (brush != null)
+						_graphics.FillPolygon(brush, points);
+
+					if (pen != null)
+						_graphics.DrawLines(pen, points);
+				}
 			}
-			//throw new NotImplementedException();
 		}
 	}
 }
