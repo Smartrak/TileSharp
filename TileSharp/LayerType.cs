@@ -5,7 +5,9 @@
 		Unset,
 		Line,
 		Polygon,
-		Point
+		Point,
+
+		PointLabel
 		//TODO: Labels, Points
 	}
 }

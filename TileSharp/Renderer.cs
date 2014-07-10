@@ -49,6 +49,9 @@ namespace TileSharp
 						case LayerType.Point:
 							RenderPoint((PointLayer)layer, featureList);
 							break;
+						case LayerType.PointLabel:
+							RenderPointLabel((PointLabelLayer)layer, featureList);
+							break;
 						default:
 							throw new NotImplementedException("Don't know how to render layer type " + layer.Type);
 					}
@@ -159,6 +162,40 @@ namespace TileSharp
 						_graphics.DrawLines(pen, points);
 				}
 			}
+		}
+
+		private void RenderPointLabel(PointLabelLayer layer, List<Feature> data)
+		{
+			var emSize = _graphics.DpiY * 14 / 72;
+
+			//TODO: Cache
+			var pen = new Pen(Color.White, 3);
+			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
+			//var font = new Font(FontFamily.GenericSansSerif, emSize, FontStyle.Bold);
+			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
+
+			//_graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			_graphics.SmoothingMode = SmoothingMode.HighQuality;
+
+			foreach (var point in data)
+			{
+				var coord = Project(new[] { point.Geometry.Coordinate })[0];
+				//TODO labels could be not strings
+				var str = point.Attributes.Exists(layer.LabelAttribute) ? point.Attributes[layer.LabelAttribute] as string : null;
+				if (string.IsNullOrWhiteSpace(str))
+					continue;
+
+				using (var path = new GraphicsPath())
+				{
+					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord + new SizeF(1, -ascent - 1), new StringFormat());
+
+					_graphics.DrawPath(pen, path);
+					_graphics.FillPath(Brushes.Black, path);
+				}
+				//_graphics.DrawString(str, new Font("Arial", 12), Brushes.Black, coord.X, coord.Y);
+			}
+			_graphics.SmoothingMode = SmoothingMode.Default;
+			//_graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
 		}
 	}
 }
