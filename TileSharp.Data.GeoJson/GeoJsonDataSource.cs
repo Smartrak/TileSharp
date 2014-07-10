@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using GeoAPI.Geometries;
 using GeoJsonSharp;
@@ -36,6 +37,15 @@ namespace TileSharp.Data.GeoJson
 			}
 
 			return res;
+		}
+
+		/// <summary>
+		/// Remove everything that matches the given predicate
+		/// </summary>
+		public GeoJsonDataSource ExceptWhere(Predicate<Feature> removeFilter)
+		{
+			_featureCollection.Features.RemoveAll(removeFilter);
+			return this;
 		}
 	}
 }
