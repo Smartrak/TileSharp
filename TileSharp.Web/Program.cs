@@ -62,7 +62,15 @@ namespace TileSharp.Web
 
 			ctx.Response.ContentType = "image/png";
 			tile.Save(ctx.Response.OutputStream, ImageFormat.Png);
-			ctx.Response.OutputStream.Close();
+
+			try
+			{
+				ctx.Response.OutputStream.Close();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Failed to close connection: " + ex);
+			}
 		}
 	}
 
