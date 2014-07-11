@@ -192,6 +192,7 @@ namespace TileSharp
 
 			//TODO: Cache
 			var pen = new Pen(Color.White, 3);
+			pen.LineJoin = LineJoin.Round;
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
 
@@ -223,6 +224,7 @@ namespace TileSharp
 
 			//TODO: Cache
 			var pen = new Pen(Color.White, 3);
+			pen.LineJoin = LineJoin.Round;
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
