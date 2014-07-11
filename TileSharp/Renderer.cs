@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using TileSharp.Layers;
 
 namespace TileSharp
@@ -78,6 +79,26 @@ namespace TileSharp
 				res[i] = new PointF(
 					(float)((c.X - _config.Envelope.MinX) * SphericalMercator.TileSize / spanX),
 					(float)((c.Y - _config.Envelope.MaxY) * SphericalMercator.TileSize / -spanY)
+					);
+			}
+			return res;
+		}
+
+		private Coordinate[] ProjectToCoordinate(Coordinate[] coords)
+		{
+			//TODO: Could consider simplifying https://github.com/mourner/simplify-js
+			//TODO: Clip polygons to map edge?
+
+			var spanX = _config.Envelope.MaxX - _config.Envelope.MinX;
+			var spanY = _config.Envelope.MaxY - _config.Envelope.MinY;
+
+			var res = new Coordinate[coords.Length];
+			for (var i = 0; i < coords.Length; i++)
+			{
+				var c = coords[i];
+				res[i] = new Coordinate(
+					((c.X - _config.Envelope.MinX) * SphericalMercator.TileSize / spanX),
+					((c.Y - _config.Envelope.MaxY) * SphericalMercator.TileSize / -spanY)
 					);
 			}
 			return res;
@@ -215,41 +236,59 @@ namespace TileSharp
 				if (string.IsNullOrWhiteSpace(str))
 					continue;
 
-				var line = (ILineString)feature.Geometry;
-				var lengthIndexed = new NetTopologySuite.LinearReferencing.LengthIndexedLine(line);
-				var midLength = line.Length / 2;
-				var subLine = lengthIndexed.ExtractLine(midLength * 0.99f, midLength * 1.01f);
-				if (subLine.Coordinates.Length < 2)
-					continue;
+				var labelSize = _graphics.MeasureString(str, font);
+				float spacing = layer.LabelStyle.Spacing;
 
-				var coords = Project(subLine.Coordinates);
-				var lastCoord = coords.Last();
+				var coords = ProjectToCoordinate(feature.Geometry.Coordinates);
+				var coordsAsLine = new LineString(coords);
+				var lengthIndexed = new NetTopologySuite.LinearReferencing.LengthIndexedLine(coordsAsLine);
 
-				var midPoint = new PointF((coords[0].X + lastCoord.X) * 0.5f, (coords[0].Y + lastCoord.Y) * 0.5f);
-				var size = _graphics.MeasureString(str, font);
+				var labelCount = (int)((coordsAsLine.Length - spacing) / (labelSize.Width + spacing));
+				if (labelCount < 1 || layer.LabelStyle.Spacing == 0)
+					labelCount = 1;
 
-				var angle = (float)(Math.Atan2(lastCoord.Y - coords[0].Y, lastCoord.X - coords[0].X) * 180 / Math.PI);
-				//Keep the text up the right way
-				if (angle > 90)
-					angle -= 180;
-				if (angle < -90)
-					angle += 180;
+				//work out spacing based on the amount of labels we'll be putting on
+				spacing = ((float)coordsAsLine.Length / labelCount) - labelSize.Width;
 
-				//TODO _graphics.RotateTransform
-				var topLeft = new PointF(-size.Width / 2, -ascent / 2);
-
-				using (var path = new GraphicsPath())
+				for (var i = 0; i < labelCount; i++)
 				{
-					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, topLeft, new StringFormat());
+					var labelCenterLength = (spacing + labelSize.Width) * (0.5f + i);
+					Console.WriteLine(labelCenterLength);
+					var subLine = lengthIndexed.ExtractLine(labelCenterLength - (labelSize.Width / 2), labelCenterLength + (labelSize.Width / 2));
+					if (subLine.Coordinates.Length < 2)
+						continue;
 
-					//path.Transform
-					_graphics.TranslateTransform(midPoint.X, midPoint.Y);
-					_graphics.RotateTransform(angle);
+					var firstCoord = subLine.Coordinates[0];
+					var lastCoord = subLine.Coordinates[subLine.Coordinates.Length -1];
+					var middleOfLabelLinePoint = lengthIndexed.ExtractPoint(labelCenterLength);
+
+
+					var midPoint = new PointF((float)(firstCoord.X + lastCoord.X + middleOfLabelLinePoint.X + middleOfLabelLinePoint.X) * 0.25f, (float)(firstCoord.Y + lastCoord.Y + middleOfLabelLinePoint.Y + middleOfLabelLinePoint.Y) * 0.25f);
+
+					Console.WriteLine(midPoint.X + ", " + midPoint.Y);
+
+					var angle = (float)(Math.Atan2(lastCoord.Y - firstCoord.Y, lastCoord.X - firstCoord.X) * 180 / Math.PI);
+					//Keep the text up the right way
+					if (angle > 90)
+						angle -= 180;
+					if (angle < -90)
+						angle += 180;
+
+					var topLeft = new PointF(-labelSize.Width / 2, -ascent / 2);
+
+					using (var path = new GraphicsPath())
 					{
-						_graphics.DrawPath(pen, path);
-						_graphics.FillPath(Brushes.Black, path);
+						path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, topLeft, new StringFormat());
+
+						//path.Transform
+						_graphics.TranslateTransform(midPoint.X, midPoint.Y);
+						_graphics.RotateTransform(angle);
+						{
+							_graphics.DrawPath(pen, path);
+							_graphics.FillPath(Brushes.Black, path);
+						}
+						_graphics.ResetTransform();
 					}
-					_graphics.ResetTransform();
 				}
 			}
 			_graphics.SmoothingMode = SmoothingMode.Default;
