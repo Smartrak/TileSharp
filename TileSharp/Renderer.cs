@@ -30,7 +30,9 @@ namespace TileSharp
 
 				foreach (var layer in config.LayerConfig.Layers)
 				{
-					if (layer.MaxZoom.HasValue && layer.MaxZoom.Value > config.ZoomLevel)
+					if (layer.MaxZoom.HasValue && layer.MaxZoom.Value < config.ZoomLevel)
+						continue;
+					if (layer.MinZoom.HasValue && layer.MinZoom.Value > config.ZoomLevel)
 						continue;
 
 					if (!features.ContainsKey(layer.DataSource))
@@ -255,7 +257,6 @@ namespace TileSharp
 				for (var i = 0; i < labelCount; i++)
 				{
 					var labelCenterLength = (spacing + labelSize.Width) * (0.5f + i);
-					Console.WriteLine(labelCenterLength);
 					var subLine = lengthIndexed.ExtractLine(labelCenterLength - (labelSize.Width / 2), labelCenterLength + (labelSize.Width / 2));
 					if (subLine.Coordinates.Length < 2)
 						continue;
@@ -266,8 +267,6 @@ namespace TileSharp
 
 
 					var midPoint = new PointF((float)(firstCoord.X + lastCoord.X + middleOfLabelLinePoint.X + middleOfLabelLinePoint.X) * 0.25f, (float)(firstCoord.Y + lastCoord.Y + middleOfLabelLinePoint.Y + middleOfLabelLinePoint.Y) * 0.25f);
-
-					Console.WriteLine(midPoint.X + ", " + midPoint.Y);
 
 					var angle = (float)(Math.Atan2(lastCoord.Y - firstCoord.Y, lastCoord.X - firstCoord.X) * 180 / Math.PI);
 					//Keep the text up the right way
