@@ -36,7 +36,7 @@ namespace TileSharp
 						continue;
 
 					if (!features.ContainsKey(layer.DataSource))
-						features.Add(layer.DataSource, layer.DataSource.Fetch(config.Envelope));
+						features.Add(layer.DataSource, layer.DataSource.Fetch(config.PaddedEnvelope));
 					var featureList = features[layer.DataSource];
 
 					switch (layer.Type)

@@ -14,6 +14,11 @@ namespace TileSharp
 		/// </summary>
 		public readonly Envelope Envelope;
 
+		/// <summary>
+		/// Envelope padded to be 3x the size of Envelope in each dimension, fixed labelling errors
+		/// </summary>
+		public readonly Envelope PaddedEnvelope;
+
 		public readonly int ZoomLevel;
 
 		/// <summary>
@@ -26,7 +31,10 @@ namespace TileSharp
 			PixelSize = pixelSize;
 			ZoomLevel = zoomLevel;
 			Envelope = envelope;
+			PaddedEnvelope = envelope.Clone();
 			LayerConfig = layerConfig;
+
+			PaddedEnvelope.ExpandBy(envelope.Width, envelope.Height);
 		}
 	}
 }
