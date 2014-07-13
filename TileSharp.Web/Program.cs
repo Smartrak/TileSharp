@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using TileSharp.LabelOverlapPreventers;
 using TileSharp.Layers;
 using TileSharp.Styles;
 
@@ -19,6 +20,7 @@ namespace TileSharp.Web
 	{
 		private static LayerConfig _layerConfig;
 		public static readonly Random Random = new Random();
+		private static ILabelOverlapPreventer _overlapPreventer;
 
 		static void Main(string[] args)
 		{
@@ -32,7 +34,7 @@ namespace TileSharp.Web
 				new PolygonLayer(new RandomPolygonDataSource(), new FillStyle(Color.Cornsilk), new StrokeStyle(Color.Red, 5)),
 				new LineLayer(new RandomLineDataSource(), new StrokeStyle(Color.Blue, 3, new []{ 4.0f, 4.0f }))
 			});
-
+			_overlapPreventer = new PerfectQuadtreePreventer();
 			while (true)
 			{
 				var ctx = listener.GetContext();
@@ -56,10 +58,9 @@ namespace TileSharp.Web
 			var z = int.Parse(split[0]);
 			var x = int.Parse(split[1]);
 			var y = int.Parse(split[2]);
-			var bounds = SphericalMercator.GoogleTileBounds(z, x, y);
 
-			var renderer = new Renderer();
-			var tile = renderer.GenerateTile(new TileConfig(256, z, bounds, _layerConfig));
+			var renderer = new Renderer(_overlapPreventer);
+			var tile = renderer.GenerateTile(new TileConfig(z, x, y, _layerConfig));
 
 			ctx.Response.ContentType = "image/png";
 			tile.Save(ctx.Response.OutputStream, ImageFormat.Png);

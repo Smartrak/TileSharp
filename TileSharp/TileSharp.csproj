@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LabelOverlapPreventers\ILabelOverlapPreventer.cs" />
+    <Compile Include="LabelOverlapPreventers\LabelDetails.cs" />
+    <Compile Include="LabelOverlapPreventers\PerfectQuadtreePreventer.cs" />
     <Compile Include="Layers\LineLabelLayer.cs" />
     <Compile Include="Layers\PointLabelLayer.cs" />
     <Compile Include="Layers\PointLayer.cs" />

@@ -15,7 +15,7 @@ namespace TileSharp
 		/// <summary>
 		/// Resolution (meters/pixel) for given zoom level (measured at Equator)
 		/// </summary>
-		private static double Resolution(int zoom)
+		public static double Resolution(int zoom)
 		{
 			return InitialResolution / Math.Pow(2, zoom);
 		}

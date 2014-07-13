@@ -6,6 +6,7 @@ using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using TileSharp.LabelOverlapPreventers;
 using TileSharp.Layers;
 
 namespace TileSharp
@@ -15,15 +16,22 @@ namespace TileSharp
 	/// </summary>
 	public class Renderer
 	{
+		private readonly ILabelOverlapPreventer _labelOverlapPreventer;
+
 		private Graphics _graphics;
 		private TileConfig _config;
+
+		public Renderer(ILabelOverlapPreventer labelOverlapPreventer)
+		{
+			_labelOverlapPreventer = labelOverlapPreventer;
+		}
 
 		public Bitmap GenerateTile(TileConfig config)
 		{
 			_config = config;
 			var features = new Dictionary<IDataSource, List<Feature>>();
 
-			var bitmap = new Bitmap(config.PixelSize, config.PixelSize);
+			var bitmap = new Bitmap(SphericalMercator.TileSize, SphericalMercator.TileSize);
 			using (_graphics = Graphics.FromImage(bitmap))
 			{
 				_graphics.Clear(config.LayerConfig.BackgroundColor);
@@ -73,6 +81,7 @@ namespace TileSharp
 
 			var spanX = _config.Envelope.MaxX - _config.Envelope.MinX;
 			var spanY = _config.Envelope.MaxY - _config.Envelope.MinY;
+			var reso = SphericalMercator.Resolution(_config.ZoomLevel);
 
 			var res = new PointF[coords.Length];
 			for (var i = 0; i < coords.Length; i++)
@@ -188,14 +197,17 @@ namespace TileSharp
 			}
 		}
 
+		const int fontSize = 14;
+
 		private void RenderPointLabel(PointLabelLayer layer, List<Feature> data)
 		{
-			var emSize = _graphics.DpiY * 14 / 72;
+			var emSize = _graphics.DpiY * fontSize / 72;
 
 			//TODO: Cache
 			var pen = new Pen(Color.White, 3);
 			pen.LineJoin = LineJoin.Round;
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
+			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
 
 			_graphics.SmoothingMode = SmoothingMode.HighQuality;
@@ -208,9 +220,30 @@ namespace TileSharp
 				if (string.IsNullOrWhiteSpace(str))
 					continue;
 
+				coord += new SizeF(1, -ascent - 1);
+				var size = _graphics.MeasureString(str, font);
+
+				var xPlus = _config.Envelope.MinX / SphericalMercator.Resolution(_config.ZoomLevel);
+				var yPlus = -_config.Envelope.MaxY / SphericalMercator.Resolution(_config.ZoomLevel);
+
+				var poly = new Polygon(new LinearRing(new[]
+				{
+					new Coordinate(xPlus + coord.X, yPlus + coord.Y),
+					new Coordinate(xPlus + coord.X + size.Width, yPlus + coord.Y),
+					new Coordinate(xPlus + coord.X + size.Width, yPlus + coord.Y + ascent),
+					new Coordinate(xPlus + coord.X, yPlus + coord.Y + ascent),
+					new Coordinate(xPlus + coord.X, yPlus + coord.Y) //TODO: Just pass the first one twice
+				}));
+
+				if (str == "Taumarunui")
+					Console.WriteLine("TT: " + poly);
+
+				if (!_labelOverlapPreventer.CanPlaceLabel(_config, new LabelDetails(poly, str)))
+					continue;
+
 				using (var path = new GraphicsPath())
 				{
-					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord + new SizeF(1, -ascent - 1), new StringFormat());
+					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord, new StringFormat());
 
 					_graphics.DrawPath(pen, path);
 					_graphics.FillPath(Brushes.Black, path);
@@ -221,7 +254,6 @@ namespace TileSharp
 
 		private void RenderLineLabel(LineLabelLayer layer, List<Feature> data)
 		{
-			var fontSize = 14;
 			var emSize = _graphics.DpiY * fontSize / 72;
 
 			//TODO: Cache

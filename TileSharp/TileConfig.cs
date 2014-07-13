@@ -5,11 +5,6 @@ namespace TileSharp
 	public class TileConfig
 	{
 		/// <summary>
-		/// The Width/Height of the tile image in pixels
-		/// </summary>
-		public readonly int PixelSize;
-
-		/// <summary>
 		/// Bounds of the tile
 		/// </summary>
 		public readonly Envelope Envelope;
@@ -20,21 +15,25 @@ namespace TileSharp
 		public readonly Envelope PaddedEnvelope;
 
 		public readonly int ZoomLevel;
+		public readonly int TileX;
+		public readonly int TileY;
 
 		/// <summary>
 		/// Layers and rendering settings for the tile
 		/// </summary>
 		public readonly LayerConfig LayerConfig;
 
-		public TileConfig(int pixelSize, int zoomLevel, Envelope envelope, LayerConfig layerConfig)
+		public TileConfig(int z, int x, int y, LayerConfig layerConfig)
 		{
-			PixelSize = pixelSize;
-			ZoomLevel = zoomLevel;
-			Envelope = envelope;
-			PaddedEnvelope = envelope.Clone();
+			ZoomLevel = z;
+			TileX = x;
+			TileY = y;
+
+			Envelope = SphericalMercator.GoogleTileBounds(z, x, y);
 			LayerConfig = layerConfig;
 
-			PaddedEnvelope.ExpandBy(envelope.Width, envelope.Height);
+			PaddedEnvelope = Envelope.Clone();
+			PaddedEnvelope.ExpandBy(Envelope.Width, Envelope.Height);
 		}
 	}
 }
