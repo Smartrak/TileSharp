@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -28,27 +27,31 @@ namespace TileSharp.Data.Spatialite
 			_geometryColumn = geometryColumn;
 			_attributeColumns = attributeColumns ?? new string[0];
 
-			_baseSql = string.Format("SELECT {0}{1} FROM {2} WHERE ST_INTERSECTS ({0}, ST_GeomFromText(:envelope))", geometryColumn, attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
+			_baseSql = string.Format(
+				"SELECT {0}{1} " +
+				"FROM {2} " +
+				"WHERE ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name='{2}' AND search_frame=ST_GeomFromText(:envelope))", geometryColumn, attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
 		}
 
 		public List<Feature> Fetch(Envelope envelope)
 		{
+			var res = new List<Feature>();
 
 			using (var comm = _conn.CreateCommand())
 			{
 				comm.CommandText = _baseSql;
-				comm.Parameters.AddWithValue("envelope", "SRID=900913;" + new Polygon(new LinearRing(new Coordinate[]
+				var polygon = new Polygon(new LinearRing(new[]
 				{
 					new Coordinate(envelope.MinX, envelope.MinY),
 					new Coordinate(envelope.MaxX, envelope.MinY),
 					new Coordinate(envelope.MaxX, envelope.MaxY),
 					new Coordinate(envelope.MinX, envelope.MaxY),
 					new Coordinate(envelope.MinX, envelope.MinY)
-				})));
+				}));
+				comm.Parameters.AddWithValue("envelope", polygon);
 
 				using (var reader = comm.ExecuteReader())
 				{
-					var res = new List<Feature>();
 					while (reader.Read())
 					{
 						var feature = new Feature(_geoReader.Read((byte[])reader[_geometryColumn]), new AttributesTable());
@@ -57,9 +60,10 @@ namespace TileSharp.Data.Spatialite
 							feature.Attributes.AddAttribute(attr, reader[attr]);
 					}
 
-					return res;
 				}
 			}
+
+			return res;
 		}
 
 		public void Dispose()
