@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
-using TileSharp.LabelOverlapPreventers;
 using TileSharp.Symbolizers;
 
 namespace TileSharp.GdiRenderer
