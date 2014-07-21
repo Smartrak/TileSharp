@@ -2,17 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Net;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using TileSharp.LabelOverlapPreventers;
-using TileSharp.Layers;
-using TileSharp.Styles;
+using TileSharp.Symbolizers;
 
 namespace TileSharp.Web
 {
@@ -31,8 +26,8 @@ namespace TileSharp.Web
 
 			_layerConfig = new LayerConfig(Color.Cyan, new List<Layer>
 			{
-				new PolygonLayer(new RandomPolygonDataSource(), new FillStyle(Color.Cornsilk), new StrokeStyle(Color.Red, 5)),
-				new LineLayer(new RandomLineDataSource(), new StrokeStyle(Color.Blue, 3, new []{ 4.0f, 4.0f }))
+				new Layer(new RandomPolygonDataSource(), new Rule(new PolygonSymbolizer(Color.Cornsilk, Color.Red, 5))),
+				new Layer(new RandomLineDataSource(), new Rule(new LineSymbolizer(Color.Blue, 3, new []{ 4.0f, 4.0f })))
 			});
 			_overlapPreventer = new PerfectQuadtreePreventer();
 			while (true)
@@ -59,7 +54,7 @@ namespace TileSharp.Web
 			var x = int.Parse(split[1]);
 			var y = int.Parse(split[2]);
 
-			var renderer = new Renderer(_overlapPreventer);
+			var renderer = new GdiRenderer.Renderer(_overlapPreventer);
 			var tile = renderer.GenerateTile(new TileConfig(z, x, y, _layerConfig));
 
 			ctx.Response.ContentType = "image/png";
