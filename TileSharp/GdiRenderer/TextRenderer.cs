@@ -16,7 +16,8 @@ namespace TileSharp.GdiRenderer
 {
 	class TextRenderer : RendererPart
 	{
-		public TextRenderer(Renderer renderer) : base(renderer)
+		public TextRenderer(Renderer renderer)
+			: base(renderer)
 		{
 		}
 
@@ -63,9 +64,6 @@ namespace TileSharp.GdiRenderer
 			coord += new SizeF(1, -ascent - 1);
 			var size = Graphics.MeasureString(str, font);
 
-			var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
-			var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
-
 			switch (textSymbolizer.Alignment)
 			{
 				case ContentAlignment.TopRight:
@@ -79,27 +77,19 @@ namespace TileSharp.GdiRenderer
 					throw new NotImplementedException();
 			}
 
-			var poly = new Polygon(new LinearRing(new[]
+			var poly = GetCollisionBox(coord, new SizeF(size.Width, ascent));
+
+			if (LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
 			{
-				new Coordinate(xPlus + coord.X, yPlus + coord.Y),
-				new Coordinate(xPlus + coord.X + size.Width, yPlus + coord.Y),
-				new Coordinate(xPlus + coord.X + size.Width, yPlus + coord.Y + ascent),
-				new Coordinate(xPlus + coord.X, yPlus + coord.Y + ascent),
-				new Coordinate(xPlus + coord.X, yPlus + coord.Y) //TODO: Just pass the first one twice
-			}));
+				//Graphics.DrawLines(Pens.Orange, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
 
-			if (!LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
-				return;
+				using (var path = new GraphicsPath())
+				{
+					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord, new StringFormat());
 
-
-			Graphics.DrawLines(Pens.Orange, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
-
-			using (var path = new GraphicsPath())
-			{
-				path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord, new StringFormat());
-
-				Graphics.DrawPath(pen, path);
-				Graphics.FillPath(brush, path);
+					Graphics.DrawPath(pen, path);
+					Graphics.FillPath(brush, path);
+				}
 			}
 			Graphics.SmoothingMode = SmoothingMode.Default;
 		}
@@ -145,7 +135,7 @@ namespace TileSharp.GdiRenderer
 					continue;
 
 				var firstCoord = subLine.Coordinates[0];
-				var lastCoord = subLine.Coordinates[subLine.Coordinates.Length -1];
+				var lastCoord = subLine.Coordinates[subLine.Coordinates.Length - 1];
 				var middleOfLabelLinePoint = lengthIndexed.ExtractPoint(labelCenterLength);
 
 
@@ -160,51 +150,75 @@ namespace TileSharp.GdiRenderer
 
 				var topLeft = new PointF(-size.Width / 2, -ascent / 2);
 
+				var poly = GetCollisionBox(midPoint, new SizeF(size.Width, ascent), angle);
 
-				var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
-				var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
-
-				var rotation = new Matrix();
-				rotation.RotateAt(angle, midPoint);
-
-				var points = new[]
+				if (LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
 				{
-					new PointF(midPoint.X + topLeft.X, midPoint.Y + topLeft.Y),
-					new PointF(midPoint.X - topLeft.X, midPoint.Y + topLeft.Y),
-					new PointF(midPoint.X - topLeft.X, midPoint.Y - topLeft.Y),
-					new PointF(midPoint.X + topLeft.X, midPoint.Y - topLeft.Y),
-				};
-				rotation.TransformPoints(points);
+					//Graphics.DrawLines(Pens.Green, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
 
-				var poly = new Polygon(new LinearRing(new[]
-				{
-					new Coordinate(xPlus + points[0].X, yPlus + points[0].Y),
-					new Coordinate(xPlus + points[1].X, yPlus + points[1].Y),
-					new Coordinate(xPlus + points[2].X, yPlus + points[2].Y),
-					new Coordinate(xPlus + points[3].X, yPlus + points[3].Y),
-					new Coordinate(xPlus + points[0].X, yPlus + points[0].Y)
-				}));
-
-				if (!LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
-					return;
-				Graphics.DrawLines(Pens.Green, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
-
-
-				using (var path = new GraphicsPath())
-				{
-					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, topLeft, new StringFormat());
-
-					//path.Transform
-					Graphics.TranslateTransform(midPoint.X, midPoint.Y);
-					Graphics.RotateTransform(angle);
+					using (var path = new GraphicsPath())
 					{
-						Graphics.DrawPath(pen, path);
-						Graphics.FillPath(brush, path);
+						path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, topLeft, new StringFormat());
+
+						//path.Transform
+						Graphics.TranslateTransform(midPoint.X, midPoint.Y);
+						Graphics.RotateTransform(angle);
+						{
+							Graphics.DrawPath(pen, path);
+							Graphics.FillPath(brush, path);
+						}
+						Graphics.ResetTransform();
 					}
-					Graphics.ResetTransform();
 				}
 			}
 			Graphics.SmoothingMode = SmoothingMode.Default;
+		}
+
+		private Polygon GetCollisionBox(PointF center, SizeF size, float angle)
+		{
+			var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
+			var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
+
+			var rotation = new Matrix();
+			rotation.RotateAt(angle, center);
+
+			var halfWidth = size.Width * 0.5f;
+			var halfHeight = size.Height * 0.5f;
+
+			var points = new[]
+			{
+				new PointF(center.X + halfWidth, center.Y + halfHeight),
+				new PointF(center.X - halfWidth, center.Y + halfHeight),
+				new PointF(center.X - halfWidth, center.Y - halfHeight),
+				new PointF(center.X + halfWidth, center.Y - halfHeight),
+			};
+			rotation.TransformPoints(points);
+
+			var poly = new Polygon(new LinearRing(new[]
+			{
+				new Coordinate(xPlus + points[0].X, yPlus + points[0].Y),
+				new Coordinate(xPlus + points[1].X, yPlus + points[1].Y),
+				new Coordinate(xPlus + points[2].X, yPlus + points[2].Y),
+				new Coordinate(xPlus + points[3].X, yPlus + points[3].Y),
+				new Coordinate(xPlus + points[0].X, yPlus + points[0].Y)
+			}));
+			return poly;
+		}
+
+		private Polygon GetCollisionBox(PointF topLeft, SizeF size)
+		{
+			var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
+			var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
+
+			var poly = new Polygon(new LinearRing(new[]
+			{
+				new Coordinate(xPlus + topLeft.X, yPlus + topLeft.Y),
+				new Coordinate(xPlus + topLeft.X + size.Width, yPlus + topLeft.Y),
+				new Coordinate(xPlus + topLeft.X + size.Width, yPlus + topLeft.Y + size.Height),
+				new Coordinate(xPlus + topLeft.X, yPlus + topLeft.Y + size.Height),
+				new Coordinate(xPlus + topLeft.X, yPlus + topLeft.Y) //TODO: Just pass the first one twice
+			}));
+			return poly;
 		}
 	}
 }
