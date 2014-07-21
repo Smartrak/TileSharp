@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -43,8 +44,9 @@ namespace TileSharp.GdiRenderer
 			var emSize = Graphics.DpiY * fontSize / 72;
 
 			//TODO: Cache
-			var pen = new Pen(Color.White, 3);
+			var pen = new Pen(textSymbolizer.TextHaloColor, 3);
 			pen.LineJoin = LineJoin.Round;
+			var brush = new SolidBrush(textSymbolizer.TextColor);
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
@@ -94,7 +96,7 @@ namespace TileSharp.GdiRenderer
 				path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, coord, new StringFormat());
 
 				Graphics.DrawPath(pen, path);
-				Graphics.FillPath(Brushes.Black, path);
+				Graphics.FillPath(brush, path);
 			}
 			Graphics.SmoothingMode = SmoothingMode.Default;
 		}
@@ -104,8 +106,9 @@ namespace TileSharp.GdiRenderer
 			var emSize = Graphics.DpiY * fontSize / 72;
 
 			//TODO: Cache
-			var pen = new Pen(Color.White, 3);
+			var pen = new Pen(textSymbolizer.TextHaloColor, 3);
 			pen.LineJoin = LineJoin.Round;
+			var brush = new SolidBrush(textSymbolizer.TextColor);
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
@@ -163,7 +166,7 @@ namespace TileSharp.GdiRenderer
 					Graphics.RotateTransform(angle);
 					{
 						Graphics.DrawPath(pen, path);
-						Graphics.FillPath(Brushes.Black, path);
+						Graphics.FillPath(brush, path);
 					}
 					Graphics.ResetTransform();
 				}
