@@ -14,5 +14,10 @@ namespace TileSharp
 		{
 			AcceptanceFilter = acceptanceFilter;
 		}
+
+		public static FeatureFilter StringAttrEquals(string attrName, string value)
+		{
+			return new FeatureFilter(f => (string)f.Attributes[attrName] == value);
+		}
 	}
 }
