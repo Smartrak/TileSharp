@@ -51,26 +51,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FeatureFilter.cs" />
+    <Compile Include="GdiRenderer\LineRenderer.cs" />
+    <Compile Include="GdiRenderer\PointRenderer.cs" />
+    <Compile Include="GdiRenderer\PolygonRenderer.cs" />
+    <Compile Include="GdiRenderer\RendererPart.cs" />
+    <Compile Include="GdiRenderer\TextRenderer.cs" />
     <Compile Include="LabelOverlapPreventers\ILabelOverlapPreventer.cs" />
     <Compile Include="LabelOverlapPreventers\LabelDetails.cs" />
     <Compile Include="LabelOverlapPreventers\PerfectQuadtreePreventer.cs" />
-    <Compile Include="Layers\LineLabelLayer.cs" />
-    <Compile Include="Layers\PointLabelLayer.cs" />
-    <Compile Include="Layers\PointLayer.cs" />
+    <Compile Include="Rule.cs" />
     <Compile Include="SphericalMercator.cs" />
     <Compile Include="IDataSource.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="LayerConfig.cs" />
     <Compile Include="LayerType.cs" />
-    <Compile Include="Layers\LineLayer.cs" />
-    <Compile Include="Layers\PolygonLayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Renderer.cs" />
-    <Compile Include="Styles\LineLabelStyle.cs" />
-    <Compile Include="Styles\PointLabelStyle.cs" />
-    <Compile Include="Styles\PointStyle.cs" />
-    <Compile Include="Styles\StrokeStyle.cs" />
-    <Compile Include="Styles\FillStyle.cs" />
+    <Compile Include="GdiRenderer\Renderer.cs" />
+    <Compile Include="Symbolizers\LineSymbolizer.cs" />
+    <Compile Include="Symbolizers\PointSymbolizer.cs" />
+    <Compile Include="Symbolizers\PolygonSymbolizer.cs" />
+    <Compile Include="Symbolizers\Symbolizer.cs" />
+    <Compile Include="Symbolizers\TextSymbolizer.cs" />
     <Compile Include="TileConfig.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 
-namespace TileSharp.Styles
+namespace TileSharp.Symbolizers
 {
-	public class StrokeStyle
+	public class LineSymbolizer : Symbolizer
 	{
 		public readonly Color Color;
 		public readonly float Thickness;
@@ -12,7 +12,7 @@ namespace TileSharp.Styles
 		/// </summary>
 		public readonly float[] DashPattern;
 
-		public StrokeStyle(Color color, float thickness, float[] dashPattern = null)
+		public LineSymbolizer(Color color, float thickness, float[] dashPattern = null)
 		{
 			Color = color;
 			Thickness = thickness;

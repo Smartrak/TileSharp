@@ -1,36 +1,50 @@
-﻿namespace TileSharp
+﻿using System;
+
+namespace TileSharp
 {
 	public class Layer
 	{
 		public readonly IDataSource DataSource;
-		public readonly LayerType Type;
+		public readonly Rule[] Rules;
 
-		/// <summary>
-		/// The maximum (most zoomed in) level that this layer will show up at
-		/// </summary>
-		public int? MaxZoom { get; private set; }
+		//Calculated based on child rules
+		public readonly int? MinZoom, MaxZoom;
 
-		/// <summary>
-		/// The minimum (least zoomed in) level that this layer will show up at
-		/// </summary>
-		public int? MinZoom { get; private set; }
-
-		protected Layer(IDataSource dataSource, LayerType type)
+		public Layer(IDataSource dataSource, params Rule[] rules)
 		{
 			DataSource = dataSource;
-			Type = type;
-		}
+			Rules = rules;
 
-		public Layer SetMaxZoom(int maxZoom)
-		{
-			MaxZoom = maxZoom;
-			return this;
-		}
+			#region work out MinZoom / MaxZoom
+			bool allMinZoom = true, allMaxZoom = true;
 
-		public Layer SetMinZoom(int minZoom)
-		{
-			MinZoom = minZoom;
-			return this;
+			foreach (var rule in rules)
+			{
+				if (rule.MinZoom.HasValue)
+				{
+					MinZoom = MinZoom.HasValue ? Math.Min(MinZoom.Value, rule.MinZoom.Value) : rule.MinZoom.Value;
+				}
+				else
+				{
+					allMinZoom = false;
+				}
+
+
+				if (rule.MaxZoom.HasValue)
+				{
+					MaxZoom = MaxZoom.HasValue ? Math.Min(MaxZoom.Value, rule.MaxZoom.Value) : rule.MaxZoom.Value;
+				}
+				else
+				{
+					allMaxZoom = false;
+				}
+			}
+
+			if (!allMinZoom)
+				MinZoom = null;
+			if (!allMaxZoom)
+				MaxZoom = null;
+			#endregion
 		}
 	}
 }
