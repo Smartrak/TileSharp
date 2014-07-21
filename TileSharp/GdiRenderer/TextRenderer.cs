@@ -64,6 +64,19 @@ namespace TileSharp.GdiRenderer
 			var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
 			var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
 
+			switch (textSymbolizer.Alignment)
+			{
+				case ContentAlignment.TopRight:
+					//Do nothing
+					break;
+				case ContentAlignment.MiddleCenter:
+					coord.X -= size.Width / 2;
+					coord.Y += ascent / 2;
+					break;
+				default:
+					throw new NotImplementedException();
+			}
+
 			var poly = new Polygon(new LinearRing(new[]
 			{
 				new Coordinate(xPlus + coord.X, yPlus + coord.Y),

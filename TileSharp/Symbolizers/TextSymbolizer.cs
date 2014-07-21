@@ -1,4 +1,6 @@
-﻿namespace TileSharp.Symbolizers
+﻿using System.Drawing;
+
+namespace TileSharp.Symbolizers
 {
 	/// <summary>
 	/// https://github.com/mapnik/mapnik/wiki/TextSymbolizer
@@ -7,6 +9,7 @@
 	{
 		public readonly string LabelAttribute;
 		public readonly PlacementType Placement;
+		public readonly ContentAlignment Alignment;
 
 		/// <summary>
 		/// The distance between repeated labels.
@@ -15,10 +18,11 @@
 		/// </summary>
 		public readonly int Spacing;
 
-		public TextSymbolizer(string labelAttribute, PlacementType placement, int spacing = 0)
+		public TextSymbolizer(string labelAttribute, PlacementType placement, ContentAlignment alignment = ContentAlignment.MiddleCenter, int spacing = 0)
 		{
 			LabelAttribute = labelAttribute;
 			Placement = placement;
+			Alignment = alignment;
 			Spacing = spacing;
 		}
 
