@@ -27,9 +27,7 @@ namespace TileSharp.LabelOverlapPreventers
 					//If we collide with ourself, we can be placed
 					if (x.Outline.Intersects(label.Outline))
 					{
-						if (x.Text == label.Text)
-							return true;
-						return x.Text == label.Text;
+						return x.UniqueId == label.UniqueId;
 					}
 				}
 				qt.Insert(label.Outline.EnvelopeInternal, label);

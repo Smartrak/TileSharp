@@ -71,9 +71,9 @@ namespace TileSharp.Web
 		}
 	}
 
-	internal class RandomLineDataSource : IDataSource
+	internal class RandomLineDataSource : DataSource
 	{
-		public List<Feature> Fetch(Envelope envelope)
+		public override List<Feature> Fetch(Envelope envelope)
 		{
 			var res = new List<Feature>();
 
@@ -93,9 +93,9 @@ namespace TileSharp.Web
 		}
 	}
 
-	internal class RandomPolygonDataSource : IDataSource
+	internal class RandomPolygonDataSource : DataSource
 	{
-		public List<Feature> Fetch(Envelope envelope)
+		public override List<Feature> Fetch(Envelope envelope)
 		{
 			var res = new List<Feature>();
 

@@ -63,7 +63,7 @@
     <Compile Include="PointShape.cs" />
     <Compile Include="Rule.cs" />
     <Compile Include="SphericalMercator.cs" />
-    <Compile Include="IDataSource.cs" />
+    <Compile Include="DataSource.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="LayerConfig.cs" />
     <Compile Include="LayerType.cs" />

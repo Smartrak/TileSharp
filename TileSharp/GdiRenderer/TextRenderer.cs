@@ -88,8 +88,11 @@ namespace TileSharp.GdiRenderer
 				new Coordinate(xPlus + coord.X, yPlus + coord.Y) //TODO: Just pass the first one twice
 			}));
 
-			if (!LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, str)))
+			if (!LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
 				return;
+
+
+			Graphics.DrawLines(Pens.Orange, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
 
 			using (var path = new GraphicsPath())
 			{
@@ -120,24 +123,24 @@ namespace TileSharp.GdiRenderer
 			if (string.IsNullOrWhiteSpace(str))
 				return;
 
-			var labelSize = Graphics.MeasureString(str, font);
+			var size = Graphics.MeasureString(str, font);
 			float spacing = textSymbolizer.Spacing;
 
 			var coords = ProjectToCoordinate(feature.Geometry.Coordinates);
 			var coordsAsLine = new LineString(coords);
 			var lengthIndexed = new NetTopologySuite.LinearReferencing.LengthIndexedLine(coordsAsLine);
 
-			var labelCount = (int)((coordsAsLine.Length - spacing) / (labelSize.Width + spacing));
+			var labelCount = (int)((coordsAsLine.Length - spacing) / (size.Width + spacing));
 			if (labelCount < 1 || textSymbolizer.Spacing == 0)
 				labelCount = 1;
 
 			//work out spacing based on the amount of labels we'll be putting on
-			spacing = ((float)coordsAsLine.Length / labelCount) - labelSize.Width;
+			spacing = ((float)coordsAsLine.Length / labelCount) - size.Width;
 
 			for (var i = 0; i < labelCount; i++)
 			{
-				var labelCenterLength = (spacing + labelSize.Width) * (0.5f + i);
-				var subLine = lengthIndexed.ExtractLine(labelCenterLength - (labelSize.Width / 2), labelCenterLength + (labelSize.Width / 2));
+				var labelCenterLength = (spacing + size.Width) * (0.5f + i);
+				var subLine = lengthIndexed.ExtractLine(labelCenterLength - (size.Width / 2), labelCenterLength + (size.Width / 2));
 				if (subLine.Coordinates.Length < 2)
 					continue;
 
@@ -155,7 +158,37 @@ namespace TileSharp.GdiRenderer
 				if (angle < -90)
 					angle += 180;
 
-				var topLeft = new PointF(-labelSize.Width / 2, -ascent / 2);
+				var topLeft = new PointF(-size.Width / 2, -ascent / 2);
+
+
+				var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
+				var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
+
+				var rotation = new Matrix();
+				rotation.RotateAt(angle, midPoint);
+
+				var points = new[]
+				{
+					new PointF(midPoint.X + topLeft.X, midPoint.Y + topLeft.Y),
+					new PointF(midPoint.X - topLeft.X, midPoint.Y + topLeft.Y),
+					new PointF(midPoint.X - topLeft.X, midPoint.Y - topLeft.Y),
+					new PointF(midPoint.X + topLeft.X, midPoint.Y - topLeft.Y),
+				};
+				rotation.TransformPoints(points);
+
+				var poly = new Polygon(new LinearRing(new[]
+				{
+					new Coordinate(xPlus + points[0].X, yPlus + points[0].Y),
+					new Coordinate(xPlus + points[1].X, yPlus + points[1].Y),
+					new Coordinate(xPlus + points[2].X, yPlus + points[2].Y),
+					new Coordinate(xPlus + points[3].X, yPlus + points[3].Y),
+					new Coordinate(xPlus + points[0].X, yPlus + points[0].Y)
+				}));
+
+				if (!LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
+					return;
+				Graphics.DrawLines(Pens.Green, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
+
 
 				using (var path = new GraphicsPath())
 				{

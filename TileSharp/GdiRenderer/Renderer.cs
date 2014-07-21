@@ -38,7 +38,7 @@ namespace TileSharp.GdiRenderer
 		public Bitmap GenerateTile(TileConfig config)
 		{
 			Config = config;
-			var features = new Dictionary<IDataSource, List<Feature>>();
+			var features = new Dictionary<DataSource, List<Feature>>();
 
 			var bitmap = new Bitmap(SphericalMercator.TileSize, SphericalMercator.TileSize);
 			using (Graphics = Graphics.FromImage(bitmap))

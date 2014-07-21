@@ -8,7 +8,7 @@ using NetTopologySuite.IO;
 
 namespace TileSharp.Data.Spatialite
 {
-	public class SpatialiteDataSource : IDataSource, IDisposable
+	public class SpatialiteDataSource : DataSource, IDisposable
 	{
 		private readonly string _baseSql;
 		private readonly GaiaGeoReader _geoReader;
@@ -28,12 +28,12 @@ namespace TileSharp.Data.Spatialite
 			_attributeColumns = attributeColumns ?? new string[0];
 
 			_baseSql = string.Format(
-				"SELECT {0}{1} " +
-				"FROM {2} " +
-				"WHERE ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name='{2}' AND search_frame=ST_GeomFromText(:envelope))", geometryColumn, attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
+				"SELECT {0}, (ROWID + {1}) as __featureid {2} " +
+				"FROM {3} " +
+				"WHERE ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name='{3}' AND search_frame=ST_GeomFromText(:envelope))", geometryColumn, (DataSourceId << 32), attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
 		}
 
-		public List<Feature> Fetch(Envelope envelope)
+		public override List<Feature> Fetch(Envelope envelope)
 		{
 			var res = new List<Feature>();
 
@@ -58,8 +58,8 @@ namespace TileSharp.Data.Spatialite
 						res.Add(feature);
 						foreach (var attr in _attributeColumns)
 							feature.Attributes.AddAttribute(attr, reader[attr]);
+						feature.Attributes.AddAttribute("__featureid", reader["__featureid"]);
 					}
-
 				}
 			}
 

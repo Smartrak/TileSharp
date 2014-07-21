@@ -4,13 +4,13 @@ namespace TileSharp
 {
 	public class Layer
 	{
-		public readonly IDataSource DataSource;
+		public readonly DataSource DataSource;
 		public readonly Rule[] Rules;
 
 		//Calculated based on child rules
 		public readonly int? MinZoom, MaxZoom;
 
-		public Layer(IDataSource dataSource, params Rule[] rules)
+		public Layer(DataSource dataSource, params Rule[] rules)
 		{
 			DataSource = dataSource;
 			Rules = rules;

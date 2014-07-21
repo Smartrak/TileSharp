@@ -1,16 +1,17 @@
 ﻿using GeoAPI.Geometries;
+using NetTopologySuite.Features;
 
 namespace TileSharp.LabelOverlapPreventers
 {
 	public class LabelDetails
 	{
 		public readonly IPolygon Outline;
-		public readonly string Text;
+		public readonly long UniqueId;
 
-		public LabelDetails(IPolygon outline, string text)
+		public LabelDetails(IPolygon outline, Feature feature)
 		{
 			Outline = outline;
-			Text = text;
+			UniqueId = (long)feature.Attributes["__featureid"];
 		}
 	}
 }

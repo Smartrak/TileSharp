@@ -7,16 +7,23 @@ using NetTopologySuite.Features;
 
 namespace TileSharp.Data.GeoJson
 {
-	public class GeoJsonDataSource : IDataSource
+	public class GeoJsonDataSource : DataSource
 	{
 		private readonly FeatureCollection _featureCollection;
 
 		public GeoJsonDataSource(string fileName)
 		{
 			_featureCollection = new GeoJsonParser(File.ReadAllText(fileName), new ParserSettings { SkipInvalidGeometry = true }).Parse();
+
+			long featureCounter = DataSourceId << 32;
+			foreach (var feature in _featureCollection.Features)
+			{
+				featureCounter++;
+				feature.Attributes.AddAttribute("__featureid", featureCounter);
+			}
 		}
 
-		public List<Feature> Fetch(Envelope envelope)
+		public override List<Feature> Fetch(Envelope envelope)
 		{
 			var res = new List<Feature>();
 
