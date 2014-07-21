@@ -60,6 +60,7 @@
     <Compile Include="LabelOverlapPreventers\ILabelOverlapPreventer.cs" />
     <Compile Include="LabelOverlapPreventers\LabelDetails.cs" />
     <Compile Include="LabelOverlapPreventers\PerfectQuadtreePreventer.cs" />
+    <Compile Include="PointShape.cs" />
     <Compile Include="Rule.cs" />
     <Compile Include="SphericalMercator.cs" />
     <Compile Include="IDataSource.cs" />
