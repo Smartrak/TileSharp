@@ -17,17 +17,19 @@ namespace TileSharp
 		public readonly int ZoomLevel;
 		public readonly int TileX;
 		public readonly int TileY;
+		public readonly int Angle;
 
 		/// <summary>
 		/// Layers and rendering settings for the tile
 		/// </summary>
 		public readonly LayerConfig LayerConfig;
 
-		public TileConfig(int z, int x, int y, LayerConfig layerConfig)
+		public TileConfig(int z, int x, int y, LayerConfig layerConfig, int angle = 0)
 		{
 			ZoomLevel = z;
 			TileX = x;
 			TileY = y;
+			Angle = angle;
 
 			Envelope = SphericalMercator.GoogleTileBounds(z, x, y);
 			LayerConfig = layerConfig;

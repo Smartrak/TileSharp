@@ -53,20 +53,20 @@ namespace TileSharp.GdiRenderer
 
 			var size = new SizeF(Graphics.MeasureString(str, font).Width, ascent);
 
+			var offset = new SizeF();
 			switch (textSymbolizer.Alignment)
 			{
 				case ContentAlignment.MiddleCenter:
-					//Do nothing
+					//no offset
 					break;
 				case ContentAlignment.TopRight:
-					coord.X += size.Width * 0.5f;
-					coord.Y += size.Height * 0.5f;
+					offset = new SizeF(size.Width * 0.5f, -size.Height * 0.5f);
 					break;
 				default:
 					throw new NotImplementedException();
 			}
 
-			TryRenderText(textSymbolizer, feature, emSize, str, coord, size, 0);
+			TryRenderText(textSymbolizer, feature, emSize, str, coord, offset, size, -Config.Angle);
 		}
 
 		private void RenderLineLabel(TextSymbolizer textSymbolizer, Feature feature)
@@ -115,24 +115,23 @@ namespace TileSharp.GdiRenderer
 
 				var angle = (float)(Math.Atan2(lastCoord.Y - firstCoord.Y, lastCoord.X - firstCoord.X) * 180 / Math.PI);
 				//Keep the text up the right way
-				if (angle > 90)
+				if (angle + Config.Angle > 90)
 					angle -= 180;
-				if (angle < -90)
+				if (angle + Config.Angle < -90)
 					angle += 180;
 
-				TryRenderText(textSymbolizer, feature, emSize, str, midPoint, new SizeF(size.Width, ascent), angle);
+				TryRenderText(textSymbolizer, feature, emSize, str, midPoint, SizeF.Empty, new SizeF(size.Width, ascent), angle);
 			}
 		}
 
-		private void TryRenderText(TextSymbolizer textSymbolizer, Feature feature, float emSize, string str, PointF center, SizeF size, float angle)
+		private void TryRenderText(TextSymbolizer textSymbolizer, Feature feature, float emSize, string str, PointF center, SizeF offset, SizeF size, float angle)
 		{
 			//TODO: Cache
 			var pen = new Pen(textSymbolizer.TextHaloColor, 3);
 			pen.LineJoin = LineJoin.Round;
 			var brush = new SolidBrush(textSymbolizer.TextColor);
 
-
-			var poly = GetCollisionBox(center, size, angle);
+			var poly = GetCollisionBox(center, offset, size, angle);
 
 			if (LabelOverlapPreventer.CanPlaceLabel(Config, new LabelDetails(poly, feature)))
 			{
@@ -146,6 +145,7 @@ namespace TileSharp.GdiRenderer
 					//path.Transform
 					Graphics.TranslateTransform(center.X, center.Y);
 					Graphics.RotateTransform(angle);
+					Graphics.TranslateTransform(offset.Width, offset.Height);
 					{
 						Graphics.DrawPath(pen, path);
 						Graphics.FillPath(brush, path);
@@ -156,23 +156,23 @@ namespace TileSharp.GdiRenderer
 			}
 		}
 
-		private Polygon GetCollisionBox(PointF center, SizeF size, float angle)
+		private Polygon GetCollisionBox(PointF center, SizeF offset, SizeF size, float angle)
 		{
 			var xPlus = Config.Envelope.MinX / SphericalMercator.Resolution(Config.ZoomLevel);
 			var yPlus = -Config.Envelope.MaxY / SphericalMercator.Resolution(Config.ZoomLevel);
 
-			var rotation = new Matrix();
-			rotation.RotateAt(angle, center);
-
 			var halfWidth = size.Width * 0.5f;
 			var halfHeight = size.Height * 0.5f;
 
+			var rotation = new Matrix();
+			rotation.RotateAt(angle, center);
+
 			var points = new[]
 			{
-				new PointF(center.X + halfWidth, center.Y + halfHeight),
-				new PointF(center.X - halfWidth, center.Y + halfHeight),
-				new PointF(center.X - halfWidth, center.Y - halfHeight),
-				new PointF(center.X + halfWidth, center.Y - halfHeight),
+				new PointF(center.X + offset.Width + halfWidth, center.Y + offset.Height + halfHeight),
+				new PointF(center.X + offset.Width - halfWidth, center.Y + offset.Height + halfHeight),
+				new PointF(center.X + offset.Width - halfWidth, center.Y + offset.Height - halfHeight),
+				new PointF(center.X + offset.Width + halfWidth, center.Y + offset.Height - halfHeight),
 			};
 			rotation.TransformPoints(points);
 
