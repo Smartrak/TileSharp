@@ -30,7 +30,7 @@ namespace TileSharp.Data.Spatialite
 			_baseSql = string.Format(
 				"SELECT {0}, (ROWID + {1}) as __featureid {2} " +
 				"FROM {3} " +
-				"WHERE ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name='{3}' AND search_frame=ST_GeomFromText(:envelope))", geometryColumn, (DataSourceId << 32), attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
+				"WHERE ROWID IN (SELECT ROWID FROM SpatialIndex WHERE f_table_name='{3}' AND search_frame=ST_GeomFromText(:envelope))", geometryColumn, ((long)DataSourceId << 32), attributeColumns == null ? "" : ", " + string.Join(", ", attributeColumns), tableName);
 		}
 
 		public override List<Feature> Fetch(Envelope envelope)
