@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
@@ -18,10 +19,12 @@ namespace TileSharp.GdiRenderer
 		internal TileConfig Config;
 
 		private readonly Dictionary<Type, RendererPart> _renderers;
- 
-		public Renderer(ILabelOverlapPreventer labelOverlapPreventer)
+		private readonly IFeatureCache _featureCache;
+
+		public Renderer(ILabelOverlapPreventer labelOverlapPreventer, IFeatureCache featureCache)
 		{
 			LabelOverlapPreventer = labelOverlapPreventer;
+			_featureCache = featureCache;
 
 			_renderers = new Dictionary<Type, RendererPart>
 			{
@@ -38,6 +41,9 @@ namespace TileSharp.GdiRenderer
 			CacheSymbolizers(config.LayerConfig);
 			var features = new Dictionary<DataSource, List<Feature>>();
 
+			long fetchingData = 0;
+			long rendering = 0;
+
 			var bitmap = new Bitmap(SphericalMercator.TileSize, SphericalMercator.TileSize);
 			using (Graphics = Graphics.FromImage(bitmap))
 			{
@@ -51,9 +57,15 @@ namespace TileSharp.GdiRenderer
 						continue;
 
 					if (!features.ContainsKey(layer.DataSource))
-						features.Add(layer.DataSource, layer.DataSource.Fetch(config.PaddedEnvelope));
+					{
+						var timer = Stopwatch.StartNew();
+						features.Add(layer.DataSource, _featureCache.Fetch(config, layer.DataSource));//.Fetch(config.PaddedEnvelope)));
+						fetchingData += timer.ElapsedTicks;
+						timer.Stop();
+					}
 					var featureList = features[layer.DataSource];
 
+					var timer2 = Stopwatch.StartNew();
 					foreach (var feature in featureList)
 					{
 						foreach (var rule in layer.Rules)
@@ -69,10 +81,14 @@ namespace TileSharp.GdiRenderer
 							Render(rule.Symbolizer, feature);
 						}
 					}
+					rendering += timer2.ElapsedTicks;
+					timer2.Stop();
 				}
 			}
 			Graphics = null;
 
+			Console.WriteLine("fetching " + fetchingData);
+			Console.WriteLine("rendering " + rendering);
 			return bitmap;
 		}
 

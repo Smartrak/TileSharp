@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C3DD7B59-08BB-4392-8915-B48C81CAEFD3}</ProjectGuid>
+    <ProjectGuid>{3A4579C0-2DA1-4834-8F30-CDD2767264AA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TileSharp</RootNamespace>
-    <AssemblyName>TileSharp</AssemblyName>
+    <RootNamespace>TileSharp.LruCache</RootNamespace>
+    <AssemblyName>TileSharp.LruCache</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CSharpTest.Net.Library">
+      <HintPath>..\packages\CSharpTest.Net.Library.2.14.126.467\lib\net45\CSharpTest.Net.Library.dll</HintPath>
+    </Reference>
     <Reference Include="GeoAPI">
       <HintPath>..\packages\GeoAPI.1.7.2\lib\net403-client\GeoAPI.dll</HintPath>
     </Reference>
@@ -43,7 +46,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,35 +53,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IFeatureCache.cs" />
-    <Compile Include="FeatureFilter.cs" />
-    <Compile Include="GdiRenderer\LineRenderer.cs" />
-    <Compile Include="GdiRenderer\PointRenderer.cs" />
-    <Compile Include="GdiRenderer\PolygonRenderer.cs" />
-    <Compile Include="GdiRenderer\RendererPart.cs" />
-    <Compile Include="GdiRenderer\TextRenderer.cs" />
-    <Compile Include="LabelOverlapPreventers\ILabelOverlapPreventer.cs" />
-    <Compile Include="LabelOverlapPreventers\LabelDetails.cs" />
-    <Compile Include="LabelOverlapPreventers\PerfectQuadtreePreventer.cs" />
-    <Compile Include="NullCache.cs" />
-    <Compile Include="PointShape.cs" />
-    <Compile Include="Rule.cs" />
-    <Compile Include="SphericalMercator.cs" />
-    <Compile Include="DataSource.cs" />
-    <Compile Include="Layer.cs" />
-    <Compile Include="LayerConfig.cs" />
-    <Compile Include="LayerType.cs" />
+    <Compile Include="LruCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GdiRenderer\Renderer.cs" />
-    <Compile Include="Symbolizers\LineSymbolizer.cs" />
-    <Compile Include="Symbolizers\PointSymbolizer.cs" />
-    <Compile Include="Symbolizers\PolygonSymbolizer.cs" />
-    <Compile Include="Symbolizers\Symbolizer.cs" />
-    <Compile Include="Symbolizers\TextSymbolizer.cs" />
-    <Compile Include="TileConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TileSharp\TileSharp.csproj">
+      <Project>{C3DD7B59-08BB-4392-8915-B48C81CAEFD3}</Project>
+      <Name>TileSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

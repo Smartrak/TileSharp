@@ -10,7 +10,7 @@ namespace TileSharp
 		public readonly Envelope Envelope;
 
 		/// <summary>
-		/// Envelope padded to be 3x the size of Envelope in each dimension, fixed labelling errors
+		/// Envelope padded to be 3x the size of Envelope in each dimension, fixes labelling errors
 		/// </summary>
 		public readonly Envelope PaddedEnvelope;
 
