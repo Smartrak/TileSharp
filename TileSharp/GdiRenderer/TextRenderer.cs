@@ -142,9 +142,9 @@ namespace TileSharp.GdiRenderer
 
 				var angle = (float)(Math.Atan2(lastCoord.Y - firstCoord.Y, lastCoord.X - firstCoord.X) * 180 / Math.PI);
 				//Keep the text up the right way
-				if (angle + Config.Angle > 90)
+				while (angle + Config.Angle > 90)
 					angle -= 180;
-				if (angle + Config.Angle < -90)
+				while (angle + Config.Angle < -90)
 					angle += 180;
 
 				TryRenderText(textSymbolizer, feature, emSize, str, midPoint, SizeF.Empty, new SizeF(size.Width, ascent), angle);
