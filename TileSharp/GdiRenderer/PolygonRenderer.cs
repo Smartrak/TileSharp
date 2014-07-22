@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
@@ -8,7 +9,11 @@ namespace TileSharp.GdiRenderer
 {
 	class PolygonRenderer : RendererPart
 	{
-		public PolygonRenderer(Renderer renderer) : base(renderer)
+		private static readonly Dictionary<Symbolizer, Brush> BrushCache = new Dictionary<Symbolizer, Brush>();
+		private static readonly Dictionary<Symbolizer, Pen> PenCache = new Dictionary<Symbolizer, Pen>();
+
+		public PolygonRenderer(Renderer renderer)
+			: base(renderer)
 		{
 		}
 
@@ -16,14 +21,33 @@ namespace TileSharp.GdiRenderer
 		{
 			var polygonSymbolizer = (PolygonSymbolizer)symbolizer;
 
-			//TODO: cache this
-			Brush brush = new SolidBrush(polygonSymbolizer.FillColor);
-
-			//TODO: cache this
-			Pen pen = null;
-			if (polygonSymbolizer.LineWidth.HasValue)
+			Brush brush;
+			if (!BrushCache.TryGetValue(symbolizer, out brush))
 			{
-				pen = new Pen(polygonSymbolizer.LineColor.Value, polygonSymbolizer.LineWidth.Value);
+				lock (symbolizer)
+				{
+					if (!BrushCache.TryGetValue(symbolizer, out brush))
+					{
+						brush = new SolidBrush(polygonSymbolizer.FillColor);
+						BrushCache.Add(symbolizer, brush);
+					}
+				}
+			}
+
+			Pen pen;
+			if (!PenCache.TryGetValue(symbolizer, out pen))
+			{
+				lock (symbolizer)
+				{
+					if (!PenCache.TryGetValue(symbolizer, out pen))
+					{
+						if (polygonSymbolizer.LineWidth.HasValue)
+						{
+							pen = new Pen(polygonSymbolizer.LineColor.Value, polygonSymbolizer.LineWidth.Value);
+						}
+						PenCache.Add(symbolizer, pen);
+					}
+				}
 			}
 
 			var polygon = (IPolygon)feature.Geometry;

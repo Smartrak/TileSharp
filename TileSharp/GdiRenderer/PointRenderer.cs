@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using NetTopologySuite.Features;
 using TileSharp.Symbolizers;
 
@@ -6,7 +7,10 @@ namespace TileSharp.GdiRenderer
 {
 	class PointRenderer : RendererPart
 	{
-		public PointRenderer(Renderer renderer) : base(renderer)
+		private static readonly Dictionary<Symbolizer, Brush> BrushCache = new Dictionary<Symbolizer, Brush>();
+		
+		public PointRenderer(Renderer renderer)
+			: base(renderer)
 		{
 		}
 
@@ -14,8 +18,18 @@ namespace TileSharp.GdiRenderer
 		{
 			var pointSymbolizer = (PointSymbolizer)symbolizer;
 
-			//TODO: cache this
-			var brush = new SolidBrush(pointSymbolizer.Color);
+			Brush brush;
+			if (!BrushCache.TryGetValue(symbolizer, out brush))
+			{
+				lock (symbolizer)
+				{
+					if (!BrushCache.TryGetValue(symbolizer, out brush))
+					{
+						brush = new SolidBrush(pointSymbolizer.Color);
+						BrushCache.Add(symbolizer, brush);
+					}
+				}
+			}
 
 			var p = Project(feature.Geometry.Coordinates)[0];
 			var diameter = (float)pointSymbolizer.Diameter;
