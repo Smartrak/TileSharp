@@ -13,24 +13,23 @@ namespace TileSharp.GdiRenderer
 		{
 		}
 
-		public override void Render(Symbolizer symbolizer, Feature feature)
+		public override void PreCache(Symbolizer symbolizer)
 		{
 			var lineSymbolizer = (LineSymbolizer)symbolizer;
 
 			Pen pen;
 			if (!PenCache.TryGetValue(symbolizer, out pen))
 			{
-				lock (symbolizer)
-				{
-					if (!PenCache.TryGetValue(symbolizer, out pen))
-					{
-						pen = new Pen(lineSymbolizer.Color, lineSymbolizer.Thickness);
-						if (lineSymbolizer.DashPattern != null)
-							pen.DashPattern = lineSymbolizer.DashPattern;
-						PenCache.Add(symbolizer, pen);
-					}
-				}
+				pen = new Pen(lineSymbolizer.Color, lineSymbolizer.Thickness);
+				if (lineSymbolizer.DashPattern != null)
+					pen.DashPattern = lineSymbolizer.DashPattern;
+				PenCache.Add(symbolizer, pen);
 			}
+		}
+
+		public override void Render(Symbolizer symbolizer, Feature feature)
+		{
+			var pen = PenCache[symbolizer];
 
 			var points = Project(feature.Geometry.Coordinates);
 			Graphics.DrawLines(pen, points);

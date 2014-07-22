@@ -9,6 +9,8 @@ namespace TileSharp
 		public readonly Color BackgroundColor;
 		public readonly List<Layer> Layers;
 
+		internal bool RenderersAreCached;
+
 		public LayerConfig(Color backgroundColor, List<Layer> layers)
 		{
 			BackgroundColor = backgroundColor;

@@ -14,6 +14,8 @@ namespace TileSharp.GdiRenderer
 			_renderer = renderer;
 		}
 
+		public abstract void PreCache(Symbolizer symbolizer);
+
 		public abstract void Render(Symbolizer symbolizer, Feature feature);
 
 		#region Pass down to _renderer

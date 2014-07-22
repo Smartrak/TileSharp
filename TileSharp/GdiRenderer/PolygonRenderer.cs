@@ -17,39 +17,33 @@ namespace TileSharp.GdiRenderer
 		{
 		}
 
-		public override void Render(Symbolizer symbolizer, Feature feature)
+		public override void PreCache(Symbolizer symbolizer)
 		{
 			var polygonSymbolizer = (PolygonSymbolizer)symbolizer;
 
-			Brush brush;
-			if (!BrushCache.TryGetValue(symbolizer, out brush))
+			if (!BrushCache.ContainsKey(symbolizer))
 			{
-				lock (symbolizer)
-				{
-					if (!BrushCache.TryGetValue(symbolizer, out brush))
-					{
-						brush = new SolidBrush(polygonSymbolizer.FillColor);
-						BrushCache.Add(symbolizer, brush);
-					}
-				}
+				var brush = new SolidBrush(polygonSymbolizer.FillColor);
+				BrushCache.Add(symbolizer, brush);
 			}
 
-			Pen pen;
-			if (!PenCache.TryGetValue(symbolizer, out pen))
+			if (!PenCache.ContainsKey(symbolizer))
 			{
-				lock (symbolizer)
+				Pen pen = null;
+				if (polygonSymbolizer.LineColor.HasValue && polygonSymbolizer.LineWidth.HasValue)
 				{
-					if (!PenCache.TryGetValue(symbolizer, out pen))
-					{
-						if (polygonSymbolizer.LineWidth.HasValue)
-						{
-							pen = new Pen(polygonSymbolizer.LineColor.Value, polygonSymbolizer.LineWidth.Value);
-						}
-						PenCache.Add(symbolizer, pen);
-					}
+					pen = new Pen(polygonSymbolizer.LineColor.Value, polygonSymbolizer.LineWidth.Value);
 				}
+				PenCache.Add(symbolizer, pen);
 			}
 
+		}
+
+		public override void Render(Symbolizer symbolizer, Feature feature)
+		{
+			var brush = BrushCache[symbolizer];
+			var pen = PenCache[symbolizer];
+			
 			var polygon = (IPolygon)feature.Geometry;
 
 			//TODO: Do we need two version of the code here, or can we just always use a graphics path?

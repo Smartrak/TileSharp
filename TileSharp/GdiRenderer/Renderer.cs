@@ -16,7 +16,8 @@ namespace TileSharp.GdiRenderer
 
 		internal Graphics Graphics;
 		internal TileConfig Config;
-		private Dictionary<Type, RendererPart> _renderers;
+
+		private readonly Dictionary<Type, RendererPart> _renderers;
  
 		public Renderer(ILabelOverlapPreventer labelOverlapPreventer)
 		{
@@ -34,6 +35,7 @@ namespace TileSharp.GdiRenderer
 		public Bitmap GenerateTile(TileConfig config)
 		{
 			Config = config;
+			CacheSymbolizers(config.LayerConfig);
 			var features = new Dictionary<DataSource, List<Feature>>();
 
 			var bitmap = new Bitmap(SphericalMercator.TileSize, SphericalMercator.TileSize);
@@ -72,6 +74,33 @@ namespace TileSharp.GdiRenderer
 			Graphics = null;
 
 			return bitmap;
+		}
+
+		private void CacheSymbolizers(LayerConfig layerConfig)
+		{
+			if (!layerConfig.RenderersAreCached)
+			{
+				lock (layerConfig)
+				{
+					if (!layerConfig.RenderersAreCached)
+					{
+						foreach (var layer in layerConfig.Layers)
+						{
+							foreach (var rule in layer.Rules)
+							{
+								var symbolizer = rule.Symbolizer;
+								var type = symbolizer.GetType();
+#if DEBUG
+								if (!_renderers.ContainsKey(type))
+									throw new Exception("Don't know how to render symbolizer " + type);
+#endif
+								_renderers[type].PreCache(symbolizer);
+							}
+						}
+						layerConfig.RenderersAreCached = true;
+					}
+				}
+			}
 		}
 
 		private void Render(Symbolizer symbolizer, Feature feature)

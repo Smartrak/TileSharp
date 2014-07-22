@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using GeoAPI.Geometries;
@@ -11,11 +12,39 @@ namespace TileSharp.GdiRenderer
 {
 	class TextRenderer : RendererPart
 	{
-		const int fontSize = 14;
+		private static readonly Dictionary<Symbolizer, Font> FontCache = new Dictionary<Symbolizer, Font>();
+		private static readonly Dictionary<Symbolizer, Brush> BrushCache = new Dictionary<Symbolizer, Brush>();
+		private static readonly Dictionary<Symbolizer, Pen> PenCache = new Dictionary<Symbolizer, Pen>();
+		
+		const int FontSize = 14;
 
 		public TextRenderer(Renderer renderer)
 			: base(renderer)
 		{
+		}
+
+		public override void PreCache(Symbolizer symbolizer)
+		{
+			var textSymbolizer = (TextSymbolizer)symbolizer;
+
+			if (!FontCache.ContainsKey(symbolizer))
+			{
+				Font font = new Font(FontFamily.GenericSansSerif, FontSize, FontStyle.Bold);
+				FontCache.Add(symbolizer, font);
+			}
+
+			if (!PenCache.ContainsKey(symbolizer))
+			{
+				var pen = new Pen(textSymbolizer.TextHaloColor, 3);
+				pen.LineJoin = LineJoin.Round;
+				PenCache.Add(symbolizer, pen);
+			}
+
+			if (!BrushCache.ContainsKey(symbolizer))
+			{
+				var brush = new SolidBrush(textSymbolizer.TextColor);
+				BrushCache.Add(symbolizer, brush);
+			}
 		}
 
 		public override void Render(Symbolizer symbolizer, Feature feature)
@@ -42,12 +71,11 @@ namespace TileSharp.GdiRenderer
 			if (string.IsNullOrWhiteSpace(str))
 				return;
 
-			var emSize = Graphics.DpiY * fontSize / 72;
+			var emSize = Graphics.DpiY * FontSize / 72;
 
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
-			//TODO: Cache
-			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
-			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
+			var font = FontCache[textSymbolizer];
+			var ascent = emSize * font.FontFamily.GetCellAscent(FontStyle.Bold) / font.FontFamily.GetEmHeight(FontStyle.Bold);
 
 			var coord = Project(feature.Geometry.Coordinates)[0];
 
@@ -76,12 +104,11 @@ namespace TileSharp.GdiRenderer
 			if (string.IsNullOrWhiteSpace(str))
 				return;
 
-			var emSize = Graphics.DpiY * fontSize / 72;
+			var emSize = Graphics.DpiY * FontSize / 72;
 
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
-			//TODO: Cache
-			var font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
-			var ascent = emSize * FontFamily.GenericSansSerif.GetCellAscent(FontStyle.Bold) / FontFamily.GenericSansSerif.GetEmHeight(FontStyle.Bold);
+			var font = FontCache[textSymbolizer];
+			var ascent = emSize * font.FontFamily.GetCellAscent(FontStyle.Bold) / font.FontFamily.GetEmHeight(FontStyle.Bold);
 
 			Graphics.SmoothingMode = SmoothingMode.HighQuality;
 
@@ -124,12 +151,10 @@ namespace TileSharp.GdiRenderer
 			}
 		}
 
-		private void TryRenderText(TextSymbolizer textSymbolizer, Feature feature, float emSize, string str, PointF center, SizeF offset, SizeF size, float angle)
+		private void TryRenderText(Symbolizer symbolizer, Feature feature, float emSize, string str, PointF center, SizeF offset, SizeF size, float angle)
 		{
-			//TODO: Cache
-			var pen = new Pen(textSymbolizer.TextHaloColor, 3);
-			pen.LineJoin = LineJoin.Round;
-			var brush = new SolidBrush(textSymbolizer.TextColor);
+			var pen = PenCache[symbolizer];
+			var brush = BrushCache[symbolizer];
 
 			var poly = GetCollisionBox(center, offset, size, angle);
 
@@ -172,7 +197,7 @@ namespace TileSharp.GdiRenderer
 				new PointF(center.X + offset.Width + halfWidth, center.Y + offset.Height + halfHeight),
 				new PointF(center.X + offset.Width - halfWidth, center.Y + offset.Height + halfHeight),
 				new PointF(center.X + offset.Width - halfWidth, center.Y + offset.Height - halfHeight),
-				new PointF(center.X + offset.Width + halfWidth, center.Y + offset.Height - halfHeight),
+				new PointF(center.X + offset.Width + halfWidth, center.Y + offset.Height - halfHeight)
 			};
 			rotation.TransformPoints(points);
 

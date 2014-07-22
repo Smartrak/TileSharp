@@ -14,22 +14,22 @@ namespace TileSharp.GdiRenderer
 		{
 		}
 
+		public override void PreCache(Symbolizer symbolizer)
+		{
+			var pointSymbolizer = (PointSymbolizer)symbolizer;
+
+			if (!BrushCache.ContainsKey(symbolizer))
+			{
+				Brush brush = new SolidBrush(pointSymbolizer.Color);
+				BrushCache.Add(symbolizer, brush);
+			}
+		}
+
 		public override void Render(Symbolizer symbolizer, Feature feature)
 		{
 			var pointSymbolizer = (PointSymbolizer)symbolizer;
 
-			Brush brush;
-			if (!BrushCache.TryGetValue(symbolizer, out brush))
-			{
-				lock (symbolizer)
-				{
-					if (!BrushCache.TryGetValue(symbolizer, out brush))
-					{
-						brush = new SolidBrush(pointSymbolizer.Color);
-						BrushCache.Add(symbolizer, brush);
-					}
-				}
-			}
+			Brush brush = BrushCache[symbolizer];
 
 			var p = Project(feature.Geometry.Coordinates)[0];
 			var diameter = (float)pointSymbolizer.Diameter;
