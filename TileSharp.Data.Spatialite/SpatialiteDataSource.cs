@@ -42,11 +42,11 @@ namespace TileSharp.Data.Spatialite
 				comm.CommandText = _baseSql;
 				var polygon = new Polygon(new LinearRing(new[]
 				{
-					new Coordinate(envelope.MinX, envelope.MinY),
-					new Coordinate(envelope.MaxX, envelope.MinY),
-					new Coordinate(envelope.MaxX, envelope.MaxY),
-					new Coordinate(envelope.MinX, envelope.MaxY),
-					new Coordinate(envelope.MinX, envelope.MinY)
+					new Coordinate((int)envelope.MinX, (int)envelope.MinY),
+					new Coordinate((int)envelope.MaxX, (int)envelope.MinY),
+					new Coordinate((int)envelope.MaxX, (int)envelope.MaxY),
+					new Coordinate((int)envelope.MinX, (int)envelope.MaxY),
+					new Coordinate((int)envelope.MinX, (int)envelope.MinY)
 				}));
 				comm.Parameters.AddWithValue("envelope", polygon);
 
