@@ -33,7 +33,10 @@ namespace TileSharp.Web
 			while (true)
 			{
 				var ctx = listener.GetContext();
-				ProcessRequest(ctx);
+				ThreadPool.QueueUserWorkItem(delegate
+				{
+					ProcessRequest(ctx);
+				});
 			}
 		}
 

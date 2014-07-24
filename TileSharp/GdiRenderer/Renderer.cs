@@ -66,19 +66,24 @@ namespace TileSharp.GdiRenderer
 					var featureList = features[layer.DataSource];
 
 					var timer2 = Stopwatch.StartNew();
-					foreach (var feature in featureList)
+					foreach (var rule in layer.Rules)
 					{
-						foreach (var rule in layer.Rules)
+						if (rule.MaxZoom.HasValue && rule.MaxZoom.Value < config.ZoomLevel)
+							continue;
+						if (rule.MinZoom.HasValue && rule.MinZoom.Value > config.ZoomLevel)
+							continue;
+
+						//Can't have a symbolizer render twice at the same time due to gdi resource reuse (You can't use a Brush/Pen on multiple threads at the same time...)
+						lock (rule.Symbolizer)
 						{
-							if (rule.MaxZoom.HasValue && rule.MaxZoom.Value < config.ZoomLevel)
-								continue;
-							if (rule.MinZoom.HasValue && rule.MinZoom.Value > config.ZoomLevel)
-								continue;
+							foreach (var feature in featureList)
+							{
+								if (rule.Filter != null && !rule.Filter.AcceptanceFilter(feature))
+									continue;
 
-							if (rule.Filter != null && !rule.Filter.AcceptanceFilter(feature))
-								continue;
 
-							Render(rule.Symbolizer, feature);
+								Render(rule.Symbolizer, feature);
+							}
 						}
 					}
 					rendering += timer2.ElapsedTicks;
