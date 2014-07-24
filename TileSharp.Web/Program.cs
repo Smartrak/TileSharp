@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Net;
+using System.Threading;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -15,7 +16,8 @@ namespace TileSharp.Web
 	{
 		private static LayerConfig _layerConfig;
 		public static readonly Random Random = new Random();
-		private static ILabelOverlapPreventer _overlapPreventer;
+		private static readonly ILabelOverlapPreventer OverlapPreventer = new PerfectQuadtreePreventer();
+		private static readonly IFeatureCache FeatureCache = new NullCache();
 
 		static void Main(string[] args)
 		{
@@ -29,7 +31,6 @@ namespace TileSharp.Web
 				new Layer(new RandomPolygonDataSource(), new Rule(new PolygonSymbolizer(Color.Cornsilk, Color.Red, 5))),
 				new Layer(new RandomLineDataSource(), new Rule(new LineSymbolizer(Color.Blue, 3, new []{ 4.0f, 4.0f })))
 			});
-			_overlapPreventer = new PerfectQuadtreePreventer();
 			while (true)
 			{
 				var ctx = listener.GetContext();
@@ -57,7 +58,7 @@ namespace TileSharp.Web
 			var x = int.Parse(split[1]);
 			var y = int.Parse(split[2]);
 
-			var renderer = new GdiRenderer.Renderer(_overlapPreventer);
+			var renderer = new GdiRenderer.Renderer(OverlapPreventer, FeatureCache);
 			var tile = renderer.GenerateTile(new TileConfig(z, x, y, _layerConfig));
 
 			ctx.Response.ContentType = "image/png";
