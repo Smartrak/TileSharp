@@ -7,12 +7,19 @@ namespace TileSharp.LruCache
 {
 	public class LruCache : IFeatureCache
 	{
-		private readonly LurchTable<Key, List<Feature>> _lurchTable = new LurchTable<Key, List<Feature>>(500);
+		private readonly int _minLevelToCache;
+		private readonly LurchTable<Key, List<Feature>> _lurchTable;
+
+		public LruCache(int maxItems, int minLevelToCache)
+		{
+			_lurchTable = new LurchTable<Key, List<Feature>>(maxItems);
+			_minLevelToCache = minLevelToCache;
+		}
 
 		public List<Feature> Fetch(TileConfig config, DataSource dataSource)
 		{
 			//Don't cache high levels
-			if (config.ZoomLevel < 12)
+			if (config.ZoomLevel < _minLevelToCache)
 				return dataSource.Fetch(config.PaddedEnvelope);
 
 			var key = new Key(dataSource, config);
