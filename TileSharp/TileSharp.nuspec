@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>TileSharp</id>
+    <version>1.0.1.0</version>
+    <authors>dave</authors>
+    <owners>dave</owners>
+    <projectUrl>https://github.com/Smartrak/TileSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Basic tile renderer for .net</description>
+    <copyright>Copyright 2014</copyright>
+    <dependencies>
+      <dependency id="GeoAPI" version="1.7.2" />
+      <dependency id="NetTopologySuite" version="1.13.2" />
+    </dependencies>
+  </metadata>
+</package>
