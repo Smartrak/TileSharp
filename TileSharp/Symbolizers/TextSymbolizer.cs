@@ -11,6 +11,8 @@ namespace TileSharp.Symbolizers
 		public readonly PlacementType Placement;
 		public readonly ContentAlignment Alignment;
 
+		public readonly int FontSize;
+
 		public readonly Color TextColor;
 		public readonly Color TextHaloColor;
 
@@ -21,12 +23,14 @@ namespace TileSharp.Symbolizers
 		/// </summary>
 		public readonly int Spacing;
 
-		public TextSymbolizer(string labelAttribute, PlacementType placement, ContentAlignment alignment = ContentAlignment.MiddleCenter, int spacing = 0, Color? textColor = null)
+		public TextSymbolizer(string labelAttribute, PlacementType placement, int fontSize, ContentAlignment alignment = ContentAlignment.MiddleCenter, int spacing = 0, Color? textColor = null)
 		{
 			LabelAttribute = labelAttribute;
 			Placement = placement;
 			Alignment = alignment;
 			Spacing = spacing;
+			
+			FontSize = fontSize;
 
 			TextColor = textColor ?? Color.Black;
 			TextHaloColor = Color.White;

@@ -16,8 +16,6 @@ namespace TileSharp.GdiRenderer
 		private static readonly Dictionary<Symbolizer, Brush> BrushCache = new Dictionary<Symbolizer, Brush>();
 		private static readonly Dictionary<Symbolizer, Pen> PenCache = new Dictionary<Symbolizer, Pen>();
 		
-		const int FontSize = 14;
-
 		public TextRenderer(Renderer renderer)
 			: base(renderer)
 		{
@@ -29,7 +27,7 @@ namespace TileSharp.GdiRenderer
 
 			if (!FontCache.ContainsKey(symbolizer))
 			{
-				Font font = new Font(FontFamily.GenericSansSerif, FontSize, FontStyle.Bold);
+				Font font = new Font(FontFamily.GenericSansSerif, textSymbolizer.FontSize, FontStyle.Bold);
 				FontCache.Add(symbolizer, font);
 			}
 
@@ -71,7 +69,7 @@ namespace TileSharp.GdiRenderer
 			if (string.IsNullOrWhiteSpace(str))
 				return;
 
-			var emSize = Graphics.DpiY * FontSize / 72;
+			var emSize = Graphics.DpiY * textSymbolizer.FontSize / 72;
 
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var font = FontCache[textSymbolizer];
@@ -104,7 +102,7 @@ namespace TileSharp.GdiRenderer
 			if (string.IsNullOrWhiteSpace(str))
 				return;
 
-			var emSize = Graphics.DpiY * FontSize / 72;
+			var emSize = Graphics.DpiY * textSymbolizer.FontSize / 72;
 
 			//ref http://msdn.microsoft.com/en-us/library/xwf9s90b(v=vs.110).aspx
 			var font = FontCache[textSymbolizer];
