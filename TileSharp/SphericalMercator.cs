@@ -23,13 +23,26 @@ namespace TileSharp
 		/// <summary>
 		/// Converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum
 		/// </summary>
-		private static Coordinate MetersToLatLon(double mX, double mY)
+		public static Coordinate MetersToLatLon(double mX, double mY)
 		{
 			var lon = (mX / OriginShift) * 180.0;
 			var lat = (mY / OriginShift) * 180.0;
 
 			lat = 180 / Math.PI * (2 * Math.Atan(Math.Exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
 			return new Coordinate(lon, lat);
+		}
+		
+		/// <summary>
+		/// Converts WGS84 lat/lon to Spherical Mercator EPSG:900913
+		/// </summary>
+		public static Coordinate LatLonToMeters(double lat, double lon)
+		{
+			var x = lon * OriginShift / 180;
+	
+			var y = Math.Log(Math.Tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+			y = y * OriginShift / 180;
+
+			return new Coordinate(x, y);
 		}
 
 		/// <summary>
