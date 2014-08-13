@@ -12,7 +12,7 @@ namespace TileSharp.LruCache
 
 		public LruCache(int maxItems, int minLevelToCache)
 		{
-			_lurchTable = new LurchTable<Key, List<Feature>>(maxItems);
+			_lurchTable = new LurchTable<Key, List<Feature>>(LurchTableOrder.Access, maxItems);
 			_minLevelToCache = minLevelToCache;
 		}
 
