@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using TileSharp.Symbolizers;
@@ -48,6 +49,7 @@ namespace TileSharp.GdiRenderer
 			using (Graphics = Graphics.FromImage(bitmap))
 			{
 				Graphics.Clear(config.LayerConfig.BackgroundColor);
+				Graphics.SmoothingMode = SmoothingMode.HighQuality;
 
 				foreach (var layer in config.LayerConfig.Layers)
 				{

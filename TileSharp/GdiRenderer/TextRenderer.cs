@@ -160,7 +160,6 @@ namespace TileSharp.GdiRenderer
 			{
 				//Graphics.DrawLines(Pens.Green, poly.Coordinates.Select(c => new PointF((float)(c.X - xPlus), (float)(c.Y - yPlus))).ToArray());
 
-				Graphics.SmoothingMode = SmoothingMode.HighQuality;
 				using (var path = new GraphicsPath())
 				{
 					path.AddString(str, FontFamily.GenericSansSerif, (int)FontStyle.Bold, emSize, new PointF(-size.Width * 0.5f, -size.Height * 0.5f), new StringFormat());
@@ -175,7 +174,6 @@ namespace TileSharp.GdiRenderer
 					}
 					Graphics.ResetTransform();
 				}
-				Graphics.SmoothingMode = SmoothingMode.Default;
 			}
 		}
 
