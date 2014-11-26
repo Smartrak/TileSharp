@@ -94,8 +94,8 @@ namespace TileSharp.GdiRenderer
 			}
 			Graphics = null;
 
-			Console.WriteLine("fetching " + fetchingData);
-			Console.WriteLine("rendering " + rendering);
+			//Console.WriteLine("fetching " + fetchingData);
+			//Console.WriteLine("rendering " + rendering);
 			return bitmap;
 		}
 
