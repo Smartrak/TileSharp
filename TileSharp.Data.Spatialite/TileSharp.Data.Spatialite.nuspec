@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>TileSharp.Data.Spatialite</id>
+    <version>1.0.1.0</version>
+    <authors>dave</authors>
+    <owners>dave</owners>
+    <projectUrl>https://github.com/Smartrak/TileSharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Spatialite data reader for TileSharp</description>
+    <copyright>Copyright 2014</copyright>
+    <dependencies>
+      <dependency id="TileSharp" version="1.0.3.3" />
+      <dependency id="GeoAPI" version="1.7.2" />
+      <dependency id="NetTopologySuite" version="1.13.2" />
+      <dependency id="NetTopologySuite.IO.SpatiaLite" version="1.13.2" />
+      <dependency id="System.Data.SQLite.Core" version="1.0.93.0" />
+      <dependency id="SpatialiteSharp" version="4.1.9.3" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\SpatialiteSharp.dll" target="lib\net45\" />
+  </files>
+</package>
