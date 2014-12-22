@@ -35,6 +35,33 @@ namespace TileSharp.Data.Spatialite
 
 		public override List<Feature> Fetch(Envelope envelope)
 		{
+			lock (this)
+			{
+				try
+				{
+					return TryFetch(envelope);
+				}
+				catch (Exception)
+				{
+					//If we explode, try restart the connection
+					_conn.Close();
+					_conn.Open();
+					SpatialiteSharp.SpatialiteLoader.Load(_conn);
+
+					try
+					{
+						return TryFetch(envelope);
+					}
+					catch (Exception)
+					{
+						return new List<Feature>();
+					}
+				}
+			}
+		}
+
+		private List<Feature> TryFetch(Envelope envelope)
+		{
 			var res = new List<Feature>();
 
 			using (var comm = _conn.CreateCommand())
