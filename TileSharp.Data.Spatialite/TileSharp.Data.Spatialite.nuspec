@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>TileSharp.Data.Spatialite</id>
-    <version>1.0.1.0</version>
+    <version>1.0.2.0</version>
     <authors>dave</authors>
     <owners>dave</owners>
     <projectUrl>https://github.com/Smartrak/TileSharp</projectUrl>
@@ -10,7 +10,7 @@
     <description>Spatialite data reader for TileSharp</description>
     <copyright>Copyright 2014</copyright>
     <dependencies>
-      <dependency id="TileSharp" version="1.0.3.3" />
+      <dependency id="TileSharp" version="1.0.3.4" />
       <dependency id="GeoAPI" version="1.7.2" />
       <dependency id="NetTopologySuite" version="1.13.2" />
       <dependency id="NetTopologySuite.IO.SpatiaLite" version="1.13.2" />

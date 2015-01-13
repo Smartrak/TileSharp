@@ -62,8 +62,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpatialiteDataSource.cs" />
+    <Compile Include="BaseSpatialiteDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SharedConnectionSpatialiteDataSource.cs" />
+    <Compile Include="SpatialiteDataSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
